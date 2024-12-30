@@ -21,14 +21,13 @@ struct ScrollOffsetKey: PreferenceKey {
 struct ContentView: View {
     @State private var displayImages: [UIImage] = []
     @State private var selectedItems: [PhotosPickerItem] = []
-    @State private var isPhotosDisplayed = false
     @State private var wasAtLeastOnePhotoWasEverDisplayed = false
     @State private var contentPhotoInScrollViewIndex: Int = -1
     
     var body: some View {
         VStack {
 
-            if isPhotosDisplayed {
+            if !displayImages.isEmpty {
                 GeometryReader { geometry in
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 20) {
@@ -49,7 +48,6 @@ struct ContentView: View {
                         .scrollTargetLayout()
                         .onChange(of: geometry.frame(in: .global)) {
                             if displayImages.count == 0 {
-                                isPhotosDisplayed = false
                                 contentPhotoInScrollViewIndex = -1
                             }
                         }
@@ -64,7 +62,7 @@ struct ContentView: View {
                     .scrollTargetBehavior(.viewAligned)
                 }
             }
-            if !isPhotosDisplayed {
+            if displayImages.isEmpty {
                 Spacer()
             }
             HStack(spacing: 0){
@@ -113,11 +111,12 @@ struct ContentView: View {
                                 for selectedItemOrder in 0..<selectedItems.count {
                                     if let data = try? await selectedItems[selectedItemOrder].loadTransferable(type: Data.self),
                                        let image = UIImage(data: data) {
+                                        withAnimation(.linear(duration: 0.25)) {
                                             displayImages.append(image)
+                                        }
                                         }
                                 }
                                 withAnimation(.linear(duration: 0.25)) {
-                                    isPhotosDisplayed = true
                                     wasAtLeastOnePhotoWasEverDisplayed = true
                                 }
                                 selectedItems = []
