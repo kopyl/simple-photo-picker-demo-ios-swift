@@ -70,7 +70,6 @@ struct ContentView: View {
             HStack(spacing: 0){
                 if wasAtLeastOnePhotoWasEverDisplayed {
                     Button {
-                        print("Saving \(contentPhotoInScrollViewIndex)", displayImages[contentPhotoInScrollViewIndex])
                         UIImageWriteToSavedPhotosAlbum(displayImages[contentPhotoInScrollViewIndex], nil, nil, nil)
                     } label: {
                         Image(systemName: "arrow.down.square.fill")
