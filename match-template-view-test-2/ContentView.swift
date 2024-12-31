@@ -138,40 +138,40 @@ struct ImageScrollView: View {
         self._handlePositions = handlePositions
     }
     
-    private func calculatedOffset(for index: Int) -> CGSize {
+    private func calculatedOffsetForTopImageCroppingOverlay(for index: Int) -> CGSize {
             let currentTop = handlePositions[index]?.top.current ?? 0
             let minTop = handlePositions[index]?.top.min ?? 0
             let offsetValue = (currentTop - minTop) - (currentTop - minTop) / 2
             return CGSize(width: 0, height: offsetValue)
         }
     
-    private func calculatedBottomOffset(for index: Int) -> CGSize {
+    private func calculatedOffsetForBottomImageCroppingOverlay(for index: Int) -> CGSize {
             let currentBottom = handlePositions[index]?.bottom.current ?? 0
             let maxBottom = handlePositions[index]?.bottom.max ?? 0
             let offsetValue = (currentBottom - maxBottom) - (currentBottom - maxBottom) / 2
             return CGSize(width: 0, height: offsetValue)
         }
     
-    private func calculatedHeight(for index: Int) -> CGFloat {
+    private func calculatedHeightForTopImageCroppingOverlay(for index: Int) -> CGFloat {
         let currentTop = handlePositions[index]?.top.current ?? 0
         let minTop = handlePositions[index]?.top.min ?? 0
         let height = currentTop - minTop
         return height
     }
     
-    private func calculatedBottomHeight(for index: Int) -> CGFloat {
+    private func calculatedHeightForBottomImageCroppingOverlay(for index: Int) -> CGFloat {
         let currentBottom = handlePositions[index]?.bottom.current ?? 0
         let maxBottom = handlePositions[index]?.bottom.max ?? 0
         let height = maxBottom - currentBottom
         return height
     }
     
-    private func calculatedPosition(for index: Int) -> CGFloat {
+    private func calculatedPositionForTopImageCroppingOverlay(for index: Int) -> CGFloat {
         let minTop = handlePositions[index]?.top.min ?? 0
         return minTop
     }
     
-    private func calculatedBottomPosition(for index: Int) -> CGFloat {
+    private func calculatedPositionForBottomImageCroppingOverlay(for index: Int) -> CGFloat {
         let maxBottom = handlePositions[index]?.bottom.max ?? 0
         return maxBottom
     }
@@ -202,13 +202,13 @@ struct ImageScrollView: View {
                                         .fill(.black)
                                         .frame(
                                             width: geometry.size.width,
-                                            height: calculatedHeight(for: index)
+                                            height: calculatedHeightForTopImageCroppingOverlay(for: index)
                                         )
                                         .position(
                                             x: geometry.size.width / 2,
-                                            y: calculatedPosition(for: index)
+                                            y: calculatedPositionForTopImageCroppingOverlay(for: index)
                                         )
-                                        .offset(calculatedOffset(for: index))
+                                        .offset(calculatedOffsetForTopImageCroppingOverlay(for: index))
 
                                     ZStack {
                                         ZStack {
@@ -240,13 +240,13 @@ struct ImageScrollView: View {
                                         .fill(.black)
                                         .frame(
                                             width: geometry.size.width,
-                                            height: calculatedBottomHeight(for: index)
+                                            height: calculatedHeightForBottomImageCroppingOverlay(for: index)
                                         )
                                         .position(
                                             x: geometry.size.width / 2,
-                                            y: calculatedBottomPosition(for: index)
+                                            y: calculatedPositionForBottomImageCroppingOverlay(for: index)
                                         )
-                                        .offset(calculatedBottomOffset(for: index))
+                                        .offset(calculatedOffsetForBottomImageCroppingOverlay(for: index))
                                     
                                     ZStack {
                                         ZStack {
