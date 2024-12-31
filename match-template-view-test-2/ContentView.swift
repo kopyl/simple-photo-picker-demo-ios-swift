@@ -60,19 +60,19 @@ struct ButtonStyled: View {
     }
 }
 
-struct CropHandle {
-    var initialTopPosition: CGFloat
-    var currentTopPosition: CGFloat
+struct CropHandlePositions {
+    var initialTop: CGFloat
+    var currentTop: CGFloat
 
-    var initialBottomPosition: CGFloat
-    var currentBottomPosition: CGFloat
+    var initialBottom: CGFloat
+    var currentBottom: CGFloat
     
-    init(_ _initialTopPosition: CGFloat, _ _initialBottomPosition: CGFloat) {
-        self.initialTopPosition = _initialTopPosition
-        self.currentTopPosition = _initialTopPosition
+    init(_ _initialTop: CGFloat, _ _initialBottom: CGFloat) {
+        self.initialTop = _initialTop
+        self.currentTop = _initialTop
         
-        self.initialBottomPosition = _initialBottomPosition
-        self.currentBottomPosition = _initialBottomPosition
+        self.initialBottom = _initialBottom
+        self.currentBottom = _initialBottom
     }
 }
 
@@ -80,7 +80,7 @@ struct ImageScrollView: View {
     @Binding var displayImages: [UIImage]
     @Binding var contentPhotoInScrollViewIndex: Int
     
-    @State private var handlePositions: [Int: CropHandle] = [:]
+    @State private var handlePositions: [Int: CropHandlePositions] = [:]
     
     init(_ displayImages: Binding<[UIImage]>, _ contentPhotoInScrollViewIndex: Binding<Int>) {
         self._displayImages = displayImages
@@ -103,7 +103,7 @@ struct ImageScrollView: View {
                                             let imageSize = calculateImageSize(for: displayImages[index], in: geometry.size)
                                             let topPositionY = (geometry.size.height - imageSize.height) / 2
                                             let bottomPositionY = topPositionY + imageSize.height
-                                            handlePositions[index] = CropHandle(topPositionY, bottomPositionY)
+                                            handlePositions[index] = CropHandlePositions(topPositionY, bottomPositionY)
                                         }
 
                                     Circle()
@@ -111,12 +111,12 @@ struct ImageScrollView: View {
                                         .frame(width: 30, height: 30)
                                         .position(
                                             x: geometry.size.width / 2,
-                                            y: handlePositions[index]?.currentTopPosition ?? 0
+                                            y: handlePositions[index]?.currentTop ?? 0
                                         )
                                         .gesture(
                                             DragGesture()
                                                 .onChanged { value in
-                                                    handlePositions[index]?.currentTopPosition = value.location.y
+                                                    handlePositions[index]?.currentTop = value.location.y
                                                 }
                                         )
 
@@ -125,12 +125,12 @@ struct ImageScrollView: View {
                                         .frame(width: 30, height: 30)
                                         .position(
                                             x: geometry.size.width / 2,
-                                            y: handlePositions[index]?.currentBottomPosition ?? 0
+                                            y: handlePositions[index]?.currentBottom ?? 0
                                         )
                                         .gesture(
                                             DragGesture()
                                                 .onChanged { value in
-                                                    handlePositions[index]?.currentBottomPosition = value.location.y
+                                                    handlePositions[index]?.currentBottom = value.location.y
                                                 }
                                         )
                                 }
@@ -144,11 +144,11 @@ struct ImageScrollView: View {
                 .scrollTargetBehavior(.viewAligned)
                 .onAppear {
                     for index in displayImages.indices {
-                        if handlePositions[index]?.currentTopPosition == nil &&
-                        handlePositions[index]?.currentBottomPosition == nil {
+                        if handlePositions[index]?.currentTop == nil &&
+                        handlePositions[index]?.currentBottom == nil {
                             let imageSize = calculateImageSize(for: displayImages[index], in: geometry.size)
-                            handlePositions[index]?.currentTopPosition = (geometry.size.height - imageSize.height) / 2
-                            handlePositions[index]?.currentBottomPosition = handlePositions[index]?.currentTopPosition ?? 0.0 + imageSize.height
+                            handlePositions[index]?.currentTop = (geometry.size.height - imageSize.height) / 2
+                            handlePositions[index]?.currentBottom = handlePositions[index]?.currentTop ?? 0.0 + imageSize.height
                         }
                     }
                 }
