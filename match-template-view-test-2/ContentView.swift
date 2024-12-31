@@ -50,6 +50,37 @@ struct SaveButton: View {
     }
 }
 
+struct ImageScrollView: View {
+    @Binding var displayImages: [UIImage]
+    @Binding var contentPhotoInScrollViewIndex: Int
+    
+    var body: some View {
+        GeometryReader { geometry in
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 20) {
+                    ForEach(displayImages, id: \.self) { image in
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: geometry.size.width, height: geometry.size.height)
+                            .background(GeometryReader { proxy in
+                                Color.clear
+                                    .preference(key: ScrollOffsetKey.self, value: proxy.frame(in: .global).origin.x)
+                            })
+                    }
+                }
+            }
+            .frame(width: geometry.size.width, height: geometry.size.height)
+            .scrollTargetLayout()
+            .onPreferenceChange(ScrollOffsetKey.self) { contentOffset in
+                let index = Int((contentOffset + geometry.size.width / 2) / geometry.size.width)
+                contentPhotoInScrollViewIndex = min(max(index, 0), displayImages.count - 1)
+            }
+            .scrollTargetBehavior(.viewAligned)
+        }
+    }
+}
+
 struct ContentView: View {
     @State private var displayImages: [UIImage] = []
     @State private var selectedItems: [PhotosPickerItem] = []
@@ -60,38 +91,8 @@ struct ContentView: View {
         VStack {
 
             if !displayImages.isEmpty {
-                GeometryReader { geometry in
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 20) {
-                                ForEach(displayImages, id: \.self) { image in
-                                    Image(uiImage: image)
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: geometry.size.width, height: geometry.size.height)
-                                        .background(GeometryReader { proxy in
-                                            Color.clear
-                                                .preference(key: ScrollOffsetKey.self, value: proxy.frame(in: .global).origin.x)
-                                        })
-                                }
-                            }
-                            
-                        }
-                        .frame(width: geometry.size.width, height: geometry.size.height)
-                        .scrollTargetLayout()
-                        .onChange(of: geometry.frame(in: .global)) {
-                            if displayImages.count == 0 {
-                                contentPhotoInScrollViewIndex = -1
-                            }
-                        }
-                        .onChange(of: contentPhotoInScrollViewIndex) {
-                            print(contentPhotoInScrollViewIndex)
-                        }
-
-                    .onPreferenceChange(ScrollOffsetKey.self) { contentOffset in
-                        let index = Int((contentOffset + geometry.size.width / 2) / geometry.size.width)
-                        contentPhotoInScrollViewIndex = min(max(index, 0), displayImages.count - 1)
-                    }
-                    .scrollTargetBehavior(.viewAligned)
+                if !displayImages.isEmpty {
+                    ImageScrollView(displayImages: $displayImages, contentPhotoInScrollViewIndex: $contentPhotoInScrollViewIndex)
                 }
             }
             if displayImages.isEmpty {
