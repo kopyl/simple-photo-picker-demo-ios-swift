@@ -138,6 +138,14 @@ struct ImageScrollView: View {
         self._handlePositions = handlePositions
     }
     
+    private func calculatedOffset(for index: Int) -> CGSize {
+            let currentTop = handlePositions[index]?.top.current ?? 0
+            let minTop = handlePositions[index]?.top.min ?? 0
+            let offsetValue = (currentTop - minTop) - (currentTop - minTop) / 2
+            return CGSize(width: 0, height: offsetValue)
+        }
+    
+    
     var body: some View {
         if !displayImages.isEmpty {
             GeometryReader { geometry in
@@ -146,6 +154,8 @@ struct ImageScrollView: View {
                         ForEach(displayImages.indices, id: \.self) { index in
                             GeometryReader { imageGeometry in
                                 ZStack {
+                                    
+                                    
                                     Image(uiImage: displayImages[index])
                                         .resizable()
                                         .scaledToFit()
@@ -155,7 +165,20 @@ struct ImageScrollView: View {
                                             let topPositionY = (geometry.size.height - imageSize.height) / 2
                                             let bottomPositionY = topPositionY + imageSize.height
                                             handlePositions[index] = CropHandlePositions(topPositionY, bottomPositionY)
+                                            print(2)
                                         }
+                                    Rectangle()
+                                        .fill(.green).opacity(/*@START_MENU_TOKEN@*/0.8/*@END_MENU_TOKEN@*/)
+                                        .frame(
+                                            width: geometry.size.width,
+                                            height: (handlePositions[index]?.top.current ?? 0) - (handlePositions[index]?.top.min ?? 0),
+                                            alignment: .top
+                                        )
+                                        .position(
+                                            x: geometry.size.width / 2,
+                                            y: (handlePositions[index]?.top.min ?? 0)
+                                        )
+                                        .offset(calculatedOffset(for: index))
 
                                     ZStack {
                                         ZStack {
