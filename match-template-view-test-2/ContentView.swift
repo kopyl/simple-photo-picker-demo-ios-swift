@@ -23,6 +23,12 @@ struct SaveButton: View {
     @Binding var contentPhotoInScrollViewIndex: Int
     @Binding var wasAtLeastOnePhotoWasEverDisplayed: Bool
     
+    init(_ displayImages: Binding<[UIImage]>, _ contentPhotoInScrollViewIndex: Binding<Int>, _ wasAtLeastOnePhotoWasEverDisplayed: Binding<Bool>) {
+            self._displayImages = displayImages
+            self._contentPhotoInScrollViewIndex = contentPhotoInScrollViewIndex
+            self._wasAtLeastOnePhotoWasEverDisplayed = wasAtLeastOnePhotoWasEverDisplayed
+        }
+    
     var body: some View {
         HStack(spacing: 0){
             if wasAtLeastOnePhotoWasEverDisplayed {
@@ -92,7 +98,7 @@ struct ContentView: View {
                 Spacer()
             }
             HStack(spacing: 0){
-                SaveButton(displayImages: $displayImages, contentPhotoInScrollViewIndex: $contentPhotoInScrollViewIndex, wasAtLeastOnePhotoWasEverDisplayed: $wasAtLeastOnePhotoWasEverDisplayed)
+                SaveButton($displayImages, $contentPhotoInScrollViewIndex, $wasAtLeastOnePhotoWasEverDisplayed)
 
                 
                 PhotosPicker(
