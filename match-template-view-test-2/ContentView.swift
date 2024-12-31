@@ -64,8 +64,8 @@ struct ImageScrollView: View {
     @Binding var displayImages: [UIImage]
     @Binding var contentPhotoInScrollViewIndex: Int
     
-    @State private var topPositionY: CGFloat = -1.0
-    @State private var bottomPositionY: CGFloat = -1.0
+    @State private var topPositions: [Int: CGFloat] = [:]
+    @State private var bottomPositions: [Int: CGFloat] = [:]
     
     init(_ displayImages: Binding<[UIImage]>, _ contentPhotoInScrollViewIndex: Binding<Int>) {
         self._displayImages = displayImages
@@ -78,17 +78,19 @@ struct ImageScrollView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 20) {
                         ForEach(displayImages.indices, id: \.self) { index in
+                            GeometryReader { imageGeometry in
                                 ZStack {
-                                    GeometryReader { imageGeometry in
-                                    // Image
                                     Image(uiImage: displayImages[index])
                                         .resizable()
                                         .scaledToFit()
                                         .frame(width: geometry.size.width, height: geometry.size.height)
                                         .onAppear{
                                             let imageSize = calculateImageSize(for: displayImages[index], in: geometry.size)
-                                            topPositionY = (geometry.size.height - imageSize.height) / 2
-                                            bottomPositionY = topPositionY + imageSize.height
+                                            let topPositionY = (geometry.size.height - imageSize.height) / 2
+                                            let bottomPositionY = topPositionY + imageSize.height
+                                            
+                                            topPositions[index] = topPositionY
+                                            bottomPositions[index] = bottomPositionY
                                         }
 
                                     Circle()
@@ -96,12 +98,12 @@ struct ImageScrollView: View {
                                         .frame(width: 30, height: 30)
                                         .position(
                                             x: geometry.size.width / 2,
-                                            y: topPositionY
+                                            y: topPositions[index] ?? 0
                                         )
                                         .gesture(
                                             DragGesture()
                                                 .onChanged { value in
-                                                    topPositionY = max(0, min(bottomPositionY, value.location.y))
+                                                    topPositions[index] = max(0, min(topPositions[index] ?? 0, value.location.y))
                                                 }
                                         )
 
@@ -110,26 +112,30 @@ struct ImageScrollView: View {
                                         .frame(width: 30, height: 30)
                                         .position(
                                             x: geometry.size.width / 2,
-                                            y: bottomPositionY
+                                            y: bottomPositions[index] ?? 0
                                         )
                                         .gesture(
                                             DragGesture()
                                                 .onChanged { value in
-                                                    bottomPositionY = max(topPositionY, min(geometry.size.height, value.location.y))
+                                                    bottomPositions[index] = max(topPositions[index] ?? 0, min(geometry.size.height, value.location.y))
                                                 }
                                         )
                                 }
                             }
+                            .frame(width: geometry.size.width, height: geometry.size.height)
                         }
                     }
                 }
                 .frame(width: geometry.size.width, height: geometry.size.height)
+                .scrollTargetLayout()
+                .scrollTargetBehavior(.viewAligned)
                 .onAppear {
-                    // Initialize positions if not set
-                    if topPositionY == -1.0 && bottomPositionY == -1.0 {
-                        let imageSize = calculateImageSize(for: displayImages.first!, in: geometry.size)
-                        topPositionY = (geometry.size.height - imageSize.height) / 2
-                        bottomPositionY = topPositionY + imageSize.height
+                    for index in displayImages.indices {
+                        if topPositions[index] == nil && bottomPositions[index] == nil {
+                            let imageSize = calculateImageSize(for: displayImages[index], in: geometry.size)
+                            topPositions[index] = (geometry.size.height - imageSize.height) / 2
+                            bottomPositions[index] = topPositions[index]! + imageSize.height
+                        }
                     }
                 }
                 .onPreferenceChange(ScrollOffsetKey.self) { contentOffset in
@@ -140,16 +146,13 @@ struct ImageScrollView: View {
         }
     }
     
-    // Helper function to calculate the image's actual size
     private func calculateImageSize(for image: UIImage, in containerSize: CGSize) -> CGSize {
         let aspectRatio = image.size.width / image.size.height
         if containerSize.width / containerSize.height > aspectRatio {
-            // Image is constrained by height
             let height = containerSize.height
             let width = height * aspectRatio
             return CGSize(width: width, height: height)
         } else {
-            // Image is constrained by width
             let width = containerSize.width
             let height = width / aspectRatio
             return CGSize(width: width, height: height)
