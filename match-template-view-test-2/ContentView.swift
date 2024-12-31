@@ -362,29 +362,6 @@ struct PhotosPickerView: View {
     }
 }
 
-func imageOrientationToTiffOrientation(_ value: UIImage.Orientation) -> Int32 {
-  switch value{
-  case .up:
-    return 1
-  case .down:
-    return 3
-  case .left:
-    return 8
-  case .right:
-    return 6
-  case .upMirrored:
-    return 2
-  case .downMirrored:
-    return 4
-  case .leftMirrored:
-    return 5
-  case .rightMirrored:
-    return 7
-  default:
-    return 1
-  }
-}
-
 // sounrce:
 // https://gist.github.com/schickling/b5d86cb070130f80bb40?permalink_comment_id=2894406#gistcomment-2894406
 extension UIImage {
