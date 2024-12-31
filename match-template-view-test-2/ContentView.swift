@@ -310,6 +310,7 @@ struct PhotosPickerView: View {
         PhotosPicker(
             selection: $selectedItems,
             selectionBehavior: .ordered,
+            matching: .not(.any(of: [.bursts, .cinematicVideos, .depthEffectPhotos, .livePhotos, .screenRecordings, .screenRecordings, .slomoVideos, .timelapseVideos, .videos])),
             photoLibrary: .shared()) {
                 HStack{
                     ButtonStyled("photo", "Pick a photo", .primary, .trailingPadding
