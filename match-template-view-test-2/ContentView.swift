@@ -63,16 +63,60 @@ struct ButtonStyled: View {
 struct CropHandlePositions {
     var initialTop: CGFloat
     var currentTop: CGFloat
-
     var initialBottom: CGFloat
     var currentBottom: CGFloat
-    
+
     init(_ _initialTop: CGFloat, _ _initialBottom: CGFloat) {
         self.initialTop = _initialTop
         self.currentTop = _initialTop
         
         self.initialBottom = _initialBottom
         self.currentBottom = _initialBottom
+    }
+
+    var top: (initial: CGFloat, current: CGFloat, min: CGFloat, max: CGFloat) {
+        get {
+            let minTop = min(initialTop, currentTop)
+            let maxTop = max(initialTop, currentTop)
+            return (initialTop, currentTop, minTop, maxTop)
+        }
+        set {
+            var modifiedValue = newValue
+            
+            if modifiedValue.current >= bottom.current {
+                modifiedValue.current = bottom.current - 10
+            }
+            else if modifiedValue.current >= bottom.initial {
+                modifiedValue.current = bottom.initial - 10
+            }
+            else {
+                initialTop = modifiedValue.initial
+                currentTop = modifiedValue.current
+            }
+        }
+    }
+
+    var bottom: (initial: CGFloat, current: CGFloat, min: CGFloat, max: CGFloat) {
+        get {
+            let minBottom = min(initialBottom, currentBottom)
+            let maxBottom = max(initialBottom, currentBottom)
+            return (initialBottom, currentBottom, minBottom, maxBottom)
+        }
+        set {
+            var modifiedValue = newValue
+            
+            if modifiedValue.current <= top.current {
+                modifiedValue.current = top.current
+            }
+            else if modifiedValue.current <= top.initial {
+                modifiedValue.current = top.initial
+            }
+            else {
+                initialBottom = modifiedValue.initial
+                currentBottom = modifiedValue.current
+            }
+            
+        }
     }
 }
 
@@ -111,12 +155,12 @@ struct ImageScrollView: View {
                                         .frame(width: 30, height: 30)
                                         .position(
                                             x: geometry.size.width / 2,
-                                            y: handlePositions[index]?.currentTop ?? 0
+                                            y: handlePositions[index]?.top.max ?? 0
                                         )
                                         .gesture(
                                             DragGesture()
                                                 .onChanged { value in
-                                                    handlePositions[index]?.currentTop = value.location.y
+                                                    handlePositions[index]?.top.current = value.location.y
                                                 }
                                         )
 
@@ -125,12 +169,12 @@ struct ImageScrollView: View {
                                         .frame(width: 30, height: 30)
                                         .position(
                                             x: geometry.size.width / 2,
-                                            y: handlePositions[index]?.currentBottom ?? 0
+                                            y: handlePositions[index]?.bottom.min ?? 0
                                         )
                                         .gesture(
                                             DragGesture()
                                                 .onChanged { value in
-                                                    handlePositions[index]?.currentBottom = value.location.y
+                                                    handlePositions[index]?.bottom.current = value.location.y
                                                 }
                                         )
                                 }
@@ -144,11 +188,11 @@ struct ImageScrollView: View {
                 .scrollTargetBehavior(.viewAligned)
                 .onAppear {
                     for index in displayImages.indices {
-                        if handlePositions[index]?.currentTop == nil &&
-                        handlePositions[index]?.currentBottom == nil {
+                        if handlePositions[index]?.top.current == nil &&
+                        handlePositions[index]?.bottom.current == nil {
                             let imageSize = calculateImageSize(for: displayImages[index], in: geometry.size)
-                            handlePositions[index]?.currentTop = (geometry.size.height - imageSize.height) / 2
-                            handlePositions[index]?.currentBottom = handlePositions[index]?.currentTop ?? 0.0 + imageSize.height
+                            handlePositions[index]?.top.current = (geometry.size.height - imageSize.height) / 2
+                            handlePositions[index]?.bottom.current = handlePositions[index]?.top.current ?? 0.0 + imageSize.height
                         }
                     }
                 }
