@@ -91,9 +91,7 @@ struct ContentView: View {
         VStack {
 
             if !displayImages.isEmpty {
-                if !displayImages.isEmpty {
-                    ImageScrollView(displayImages: $displayImages, contentPhotoInScrollViewIndex: $contentPhotoInScrollViewIndex)
-                }
+                ImageScrollView(displayImages: $displayImages, contentPhotoInScrollViewIndex: $contentPhotoInScrollViewIndex)
             }
             if displayImages.isEmpty {
                 Spacer()
