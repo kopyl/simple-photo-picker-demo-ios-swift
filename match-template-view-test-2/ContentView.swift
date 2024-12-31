@@ -8,40 +8,12 @@ struct ScrollOffsetKey: PreferenceKey {
     }
 }
 
-struct SaveButton: View {
-    @Binding var displayImages: [UIImage]
-    @Binding var contentPhotoInScrollViewIndex: Int
-    @Binding var wasAtLeastOnePhotoWasEverDisplayed: Bool
-    
-    init(_ displayImages: Binding<[UIImage]>, _ contentPhotoInScrollViewIndex: Binding<Int>, _ wasAtLeastOnePhotoWasEverDisplayed: Binding<Bool>) {
-            self._displayImages = displayImages
-            self._contentPhotoInScrollViewIndex = contentPhotoInScrollViewIndex
-            self._wasAtLeastOnePhotoWasEverDisplayed = wasAtLeastOnePhotoWasEverDisplayed
-        }
-    
-    var body: some View {
-        HStack(spacing: 0){
-            if wasAtLeastOnePhotoWasEverDisplayed {
-                ButtonStyled(
-                    action: {
-                        UIImageWriteToSavedPhotosAlbum(displayImages[displayImages.count - 1 - contentPhotoInScrollViewIndex], nil, nil, nil)
-                    },
-                    icon: "arrow.down.square.fill",
-                    text: "Save",
-                    isSecondary: true
-                )
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-                .padding(.leading, 30)
-            }
-        }
-    }
-}
-
 struct ButtonStyled: View {
     var action: () -> Void
     var icon: String
     var text: String
     var isSecondary: Bool = false
+    var padding: Edge.Set = .leading
     
     var body: some View {
         Button(action: action) {
@@ -59,6 +31,8 @@ struct ButtonStyled: View {
         .opacity(1)
         .disabled(isSecondary ? false : true)
         .controlSize(.large)
+        .transition(.move(edge: .bottom).combined(with: .opacity))
+        .padding(padding, 30)
     }
 }
 
@@ -122,9 +96,10 @@ struct PhotosPickerView: View {
                         action: {},
                         icon: "photo.fill",
                         text: "Pick a photo",
-                        isSecondary: false
+                        isSecondary: false,
+                        padding: .trailing
                     )
-                    .padding(.trailing, 30)
+                    
                 }
             }
             .onChange(of: selectedItems) { oldval, newval in
@@ -161,7 +136,16 @@ struct ContentView: View {
             ImageScrollView($displayImages, $contentPhotoInScrollViewIndex)
             Spacer()
             HStack(spacing: 0){
-                SaveButton($displayImages, $contentPhotoInScrollViewIndex, $wasAtLeastOnePhotoWasEverDisplayed)
+                if wasAtLeastOnePhotoWasEverDisplayed {
+                    ButtonStyled(
+                        action: {
+                            UIImageWriteToSavedPhotosAlbum(displayImages[displayImages.count - 1 - contentPhotoInScrollViewIndex], nil, nil, nil)
+                        },
+                        icon: "arrow.down.square.fill",
+                        text: "Save",
+                        isSecondary: true
+                    )
+                }
                 Spacer()
                 PhotosPickerView($selectedItems, $displayImages, $wasAtLeastOnePhotoWasEverDisplayed)
             }
