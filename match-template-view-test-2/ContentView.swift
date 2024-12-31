@@ -21,7 +21,7 @@ struct SaveButton: View {
     
     var body: some View {
         HStack(spacing: 0){
-            if !wasAtLeastOnePhotoWasEverDisplayed {
+            if wasAtLeastOnePhotoWasEverDisplayed {
                 ButtonStyled(
                     action: {
                         UIImageWriteToSavedPhotosAlbum(displayImages[displayImages.count - 1 - contentPhotoInScrollViewIndex], nil, nil, nil)
@@ -72,7 +72,7 @@ struct ImageScrollView: View {
     }
     
     var body: some View {
-        if displayImages.isEmpty {
+        if !displayImages.isEmpty {
             GeometryReader { geometry in
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 20) {
