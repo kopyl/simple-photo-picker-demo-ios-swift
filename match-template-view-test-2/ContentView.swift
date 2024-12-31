@@ -24,6 +24,7 @@ struct SaveButton: View {
             if wasAtLeastOnePhotoWasEverDisplayed {
                 ButtonStyled(
                     action: {
+                        print("Action")
                         UIImageWriteToSavedPhotosAlbum(displayImages[displayImages.count - 1 - contentPhotoInScrollViewIndex], nil, nil, nil)
                     },
                     icon: "arrow.down.square.fill",
@@ -57,7 +58,7 @@ struct ButtonStyled: View {
         .foregroundColor(isSecondary ? .blue : .white)
         .cornerRadius(8)
         .opacity(1)
-        .disabled(true)
+        .disabled(isSecondary ? false : true)
         .controlSize(.large)
     }
 }
