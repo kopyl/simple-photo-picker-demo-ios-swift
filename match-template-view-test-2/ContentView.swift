@@ -161,11 +161,11 @@ struct ImageScrollView: View {
                                             .fill(Color.blue)
                                             .frame(width: HandleSizes.visible.rawValue, height: HandleSizes.visible.rawValue)
                                             
-                                        Circle()
+                                        Rectangle()
                                             .fill(.clear)
-                                            .contentShape(Circle())
+                                            .contentShape(Rectangle())
                                     }
-                                    .frame(width: HandleSizes.safeArea.rawValue, height: HandleSizes.safeArea.rawValue, alignment: .center)
+                                    .frame(width: geometry.size.width, height: HandleSizes.safeArea.rawValue, alignment: .center)
                                     .position(
                                         x: geometry.size.width / 2,
                                         y: handlePositions[index]?.top.max ?? 0
@@ -182,11 +182,11 @@ struct ImageScrollView: View {
                                             .fill(Color.red)
                                             .frame(width: HandleSizes.visible.rawValue, height: HandleSizes.visible.rawValue)
                                             
-                                        Circle()
+                                        Rectangle()
                                             .fill(.clear)
-                                            .contentShape(Circle())
+                                            .contentShape(Rectangle())
                                     }
-                                    .frame(width: HandleSizes.safeArea.rawValue, height: HandleSizes.safeArea.rawValue, alignment: .center)
+                                    .frame(width: geometry.size.width, height: HandleSizes.safeArea.rawValue, alignment: .center)
                                     .position(
                                         x: geometry.size.width / 2,
                                         y: handlePositions[index]?.bottom.min ?? 0
