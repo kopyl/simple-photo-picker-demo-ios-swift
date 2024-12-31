@@ -199,7 +199,7 @@ struct ImageScrollView: View {
                                             print(2)
                                         }
                                     Rectangle()
-                                        .fill(.black)
+                                        .fill(Color("overlay-crop-color"))
                                         .frame(
                                             width: geometry.size.width,
                                             height: calculatedHeightForTopImageCroppingOverlay(for: index)
@@ -237,7 +237,7 @@ struct ImageScrollView: View {
                                     )
                                     
                                     Rectangle()
-                                        .fill(.black)
+                                        .fill(Color("overlay-crop-color"))
                                         .frame(
                                             width: geometry.size.width,
                                             height: calculatedHeightForBottomImageCroppingOverlay(for: index)
