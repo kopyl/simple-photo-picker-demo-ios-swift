@@ -385,27 +385,19 @@ func imageOrientationToTiffOrientation(_ value: UIImage.Orientation) -> Int32 {
   }
 }
 
-//func convertCIImageToCGImage(input: CIImage) -> CGImage! {
-//    let context = CIContext(options: nil)
-//    return context.createCGImage(input, from: input.extent)
-//}
-
 extension UIImage {
-    
-    /// Fix image orientaton to protrait up
+
     func fixedOrientation() -> UIImage? {
         guard imageOrientation != UIImage.Orientation.up else {
-            // This is default orientation, don't need to do anything
             return self.copy() as? UIImage
         }
         
         guard let cgImage = self.cgImage else {
-            // CGImage is not available
             return nil
         }
         
         guard let colorSpace = cgImage.colorSpace, let ctx = CGContext(data: nil, width: Int(size.width), height: Int(size.height), bitsPerComponent: cgImage.bitsPerComponent, bytesPerRow: 0, space: colorSpace, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else {
-            return nil // Not able to create CGContext
+            return nil
         }
         
         var transform: CGAffineTransform = CGAffineTransform.identity
@@ -425,8 +417,7 @@ extension UIImage {
         @unknown default:
             break
         }
-        
-        // Flip image one more time if needed to, this is to prevent flipped image
+
         switch imageOrientation {
         case .upMirrored, .downMirrored:
             transform = transform.translatedBy(x: size.width, y: 0)
