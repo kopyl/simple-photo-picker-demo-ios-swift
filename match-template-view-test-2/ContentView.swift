@@ -55,28 +55,30 @@ struct ImageScrollView: View {
     @Binding var contentPhotoInScrollViewIndex: Int
     
     var body: some View {
-        GeometryReader { geometry in
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 20) {
-                    ForEach(displayImages, id: \.self) { image in
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: geometry.size.width, height: geometry.size.height)
-                            .background(GeometryReader { proxy in
-                                Color.clear
-                                    .preference(key: ScrollOffsetKey.self, value: proxy.frame(in: .global).origin.x)
-                            })
+        if !displayImages.isEmpty {
+            GeometryReader { geometry in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 20) {
+                        ForEach(displayImages, id: \.self) { image in
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: geometry.size.width, height: geometry.size.height)
+                                .background(GeometryReader { proxy in
+                                    Color.clear
+                                        .preference(key: ScrollOffsetKey.self, value: proxy.frame(in: .global).origin.x)
+                                })
+                        }
                     }
                 }
+                .frame(width: geometry.size.width, height: geometry.size.height)
+                .scrollTargetLayout()
+                .onPreferenceChange(ScrollOffsetKey.self) { contentOffset in
+                    let index = Int((contentOffset + geometry.size.width / 2) / geometry.size.width)
+                    contentPhotoInScrollViewIndex = min(max(index, 0), displayImages.count - 1)
+                }
+                .scrollTargetBehavior(.viewAligned)
             }
-            .frame(width: geometry.size.width, height: geometry.size.height)
-            .scrollTargetLayout()
-            .onPreferenceChange(ScrollOffsetKey.self) { contentOffset in
-                let index = Int((contentOffset + geometry.size.width / 2) / geometry.size.width)
-                contentPhotoInScrollViewIndex = min(max(index, 0), displayImages.count - 1)
-            }
-            .scrollTargetBehavior(.viewAligned)
         }
     }
 }
@@ -90,9 +92,7 @@ struct ContentView: View {
     var body: some View {
         VStack {
 
-            if !displayImages.isEmpty {
-                ImageScrollView(displayImages: $displayImages, contentPhotoInScrollViewIndex: $contentPhotoInScrollViewIndex)
-            }
+            ImageScrollView(displayImages: $displayImages, contentPhotoInScrollViewIndex: $contentPhotoInScrollViewIndex)
             if displayImages.isEmpty {
                 Spacer()
             }
