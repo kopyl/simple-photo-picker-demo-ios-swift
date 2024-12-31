@@ -88,6 +88,55 @@ struct ImageScrollView: View {
     }
 }
 
+struct PhotosPickerView: View {
+    @Binding var selectedItems: [PhotosPickerItem]
+    @Binding var displayImages: [UIImage]
+    @Binding var wasAtLeastOnePhotoWasEverDisplayed: Bool
+    
+    var body: some View {
+        PhotosPicker(
+            selection: $selectedItems,
+            selectionBehavior: .ordered,
+            photoLibrary: .shared()) {
+                HStack{
+                    Spacer()
+                    Button {
+                    }
+                    label: {
+                        HStack {
+                            Image(systemName: "photo.fill")
+                                .font(.system(size: 20))
+                            Text("Pick a photo")
+                        }
+                    }
+                    .controlSize(.large)
+                    .padding(.trailing, 30)
+                    .disabled(true)
+                    .buttonStyle(BorderedProminentButtonStyleOverride())
+                }
+            }
+            .onChange(of: selectedItems) { oldval, newval in
+                Task {
+                    if oldval.count == 0 && displayImages.count > 0 {
+                        displayImages.removeAll()
+                    }
+                    for selectedItemOrder in 0..<selectedItems.count {
+                        if let data = try? await selectedItems[selectedItemOrder].loadTransferable(type: Data.self),
+                           let image = UIImage(data: data) {
+                            withAnimation(.linear(duration: 0.25)) {
+                                displayImages.append(image)
+                            }
+                        }
+                    }
+                    withAnimation(.linear(duration: 0.25)) {
+                        wasAtLeastOnePhotoWasEverDisplayed = true
+                    }
+                    selectedItems = []
+                }
+            }
+    }
+}
+
 struct ContentView: View {
     @State private var displayImages: [UIImage] = []
     @State private var selectedItems: [PhotosPickerItem] = []
@@ -102,49 +151,7 @@ struct ContentView: View {
             HStack(spacing: 0){
                 SaveButton($displayImages, $contentPhotoInScrollViewIndex, $wasAtLeastOnePhotoWasEverDisplayed)
 
-                
-                PhotosPicker(
-                    selection: $selectedItems,
-                    selectionBehavior: .ordered,
-                    photoLibrary: .shared()) {
-                        HStack{
-                            Spacer()
-                            Button {
-                            }
-                                label: {
-                                    HStack {
-                                        Image(systemName: "photo.fill")
-                                            .font(.system(size: 20))
-                                        Text("Pick a photo")
-                                    }
-                        }
-                                .controlSize(.large)
-                                .padding(.trailing, 30)
-                                .disabled(true)
-                                .buttonStyle(BorderedProminentButtonStyleOverride())
-                        }
-
-                        .onChange(of: selectedItems) { oldval, newval in
-                            Task {
-                                if oldval.count == 0 && displayImages.count > 0 {
-                                    displayImages.removeAll()
-                                }
-                                for selectedItemOrder in 0..<selectedItems.count {
-                                    if let data = try? await selectedItems[selectedItemOrder].loadTransferable(type: Data.self),
-                                       let image = UIImage(data: data) {
-                                        withAnimation(.linear(duration: 0.25)) {
-                                            displayImages.append(image)
-                                        }
-                                        }
-                                }
-                                withAnimation(.linear(duration: 0.25)) {
-                                    wasAtLeastOnePhotoWasEverDisplayed = true
-                                }
-                                selectedItems = []
-                            }
-                        }
-                        
-                    }
+                PhotosPickerView(selectedItems: $selectedItems, displayImages: $displayImages, wasAtLeastOnePhotoWasEverDisplayed: $wasAtLeastOnePhotoWasEverDisplayed)
             }
             
         }
