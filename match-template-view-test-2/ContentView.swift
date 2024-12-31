@@ -18,6 +18,32 @@ struct ScrollOffsetKey: PreferenceKey {
     }
 }
 
+struct SaveButton: View {
+    @Binding var displayImages: [UIImage]
+    @Binding var contentPhotoInScrollViewIndex: Int
+    @Binding var wasAtLeastOnePhotoWasEverDisplayed: Bool
+    
+    var body: some View {
+        HStack(spacing: 0){
+            if wasAtLeastOnePhotoWasEverDisplayed {
+                Button {
+                    UIImageWriteToSavedPhotosAlbum(displayImages[contentPhotoInScrollViewIndex], nil, nil, nil)
+                } label: {
+                    Image(systemName: "arrow.down.square.fill")
+                        .font(.system(size: 20))
+                    Text("Save")
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.blue.opacity(0.1))
+                .foregroundColor(.blue)
+                .controlSize(.large)
+                .padding(.leading, 30)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+    }
+}
+
 struct ContentView: View {
     @State private var displayImages: [UIImage] = []
     @State private var selectedItems: [PhotosPickerItem] = []
@@ -66,21 +92,8 @@ struct ContentView: View {
                 Spacer()
             }
             HStack(spacing: 0){
-                if wasAtLeastOnePhotoWasEverDisplayed {
-                    Button {
-                        UIImageWriteToSavedPhotosAlbum(displayImages[contentPhotoInScrollViewIndex], nil, nil, nil)
-                    } label: {
-                        Image(systemName: "arrow.down.square.fill")
-                            .font(.system(size: 20))
-                        Text("Save")
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.blue.opacity(0.1))
-                    .foregroundColor(/*@START_MENU_TOKEN@*/.blue/*@END_MENU_TOKEN@*/)
-                    .controlSize(.large)
-                    .padding(.leading, 30)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
+                SaveButton(displayImages: $displayImages, contentPhotoInScrollViewIndex: $contentPhotoInScrollViewIndex, wasAtLeastOnePhotoWasEverDisplayed: $wasAtLeastOnePhotoWasEverDisplayed)
+
                 
                 PhotosPicker(
                     selection: $selectedItems,
