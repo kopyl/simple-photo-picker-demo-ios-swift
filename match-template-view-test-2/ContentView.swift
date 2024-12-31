@@ -105,7 +105,6 @@ struct PhotosPickerView: View {
             selectionBehavior: .ordered,
             photoLibrary: .shared()) {
                 HStack{
-                    Spacer()
                     Button {
                     }
                     label: {
@@ -153,9 +152,10 @@ struct ContentView: View {
         VStack {
 
             ImageScrollView($displayImages, $contentPhotoInScrollViewIndex)
-            if displayImages.isEmpty { Spacer() }
+            Spacer()
             HStack(spacing: 0){
                 SaveButton($displayImages, $contentPhotoInScrollViewIndex, $wasAtLeastOnePhotoWasEverDisplayed)
+                Spacer()
                 PhotosPickerView($selectedItems, $displayImages, $wasAtLeastOnePhotoWasEverDisplayed)
             }
             
