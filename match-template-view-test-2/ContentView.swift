@@ -33,7 +33,7 @@ struct SaveButton: View {
         HStack(spacing: 0){
             if wasAtLeastOnePhotoWasEverDisplayed {
                 Button {
-                    UIImageWriteToSavedPhotosAlbum(displayImages[contentPhotoInScrollViewIndex], nil, nil, nil)
+                    UIImageWriteToSavedPhotosAlbum(displayImages[displayImages.count - 1 - contentPhotoInScrollViewIndex], nil, nil, nil)
                 } label: {
                     Image(systemName: "arrow.down.square.fill")
                         .font(.system(size: 20))
