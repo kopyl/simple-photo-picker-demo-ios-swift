@@ -151,7 +151,6 @@ struct ContentView: View {
     
     var body: some View {
         VStack {
-
             ImageScrollView($displayImages, $contentPhotoInScrollViewIndex)
             Spacer()
             HStack(spacing: 0){
