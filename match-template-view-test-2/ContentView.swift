@@ -145,12 +145,35 @@ struct ImageScrollView: View {
             return CGSize(width: 0, height: offsetValue)
         }
     
+    private func calculatedBottomOffset(for index: Int) -> CGSize {
+            let currentBottom = handlePositions[index]?.bottom.current ?? 0
+            let maxBottom = handlePositions[index]?.bottom.max ?? 0
+            let offsetValue = (currentBottom - maxBottom) - (currentBottom - maxBottom) / 2
+            return CGSize(width: 0, height: offsetValue)
+        }
+    
     private func calculatedHeight(for index: Int) -> CGFloat {
         let currentTop = handlePositions[index]?.top.current ?? 0
         let minTop = handlePositions[index]?.top.min ?? 0
         let height = currentTop - minTop
         return height
-//    height: (handlePositions[index]?.top.current ?? 0) - (handlePositions[index]?.top.min ?? 0),
+    }
+    
+    private func calculatedBottomHeight(for index: Int) -> CGFloat {
+        let currentBottom = handlePositions[index]?.bottom.current ?? 0
+        let maxBottom = handlePositions[index]?.bottom.max ?? 0
+        let height = maxBottom - currentBottom
+        return height
+    }
+    
+    private func calculatedPosition(for index: Int) -> CGFloat {
+        let minTop = handlePositions[index]?.top.min ?? 0
+        return minTop
+    }
+    
+    private func calculatedBottomPosition(for index: Int) -> CGFloat {
+        let maxBottom = handlePositions[index]?.bottom.max ?? 0
+        return maxBottom
     }
     
     
@@ -183,7 +206,7 @@ struct ImageScrollView: View {
                                         )
                                         .position(
                                             x: geometry.size.width / 2,
-                                            y: (handlePositions[index]?.top.min ?? 0)
+                                            y: calculatedPosition(for: index)
                                         )
                                         .offset(calculatedOffset(for: index))
 
@@ -212,6 +235,18 @@ struct ImageScrollView: View {
                                                 handlePositions[index]?.top.current = value.location.y
                                             }
                                     )
+                                    
+                                    Rectangle()
+                                        .fill(.green).opacity(/*@START_MENU_TOKEN@*/0.8/*@END_MENU_TOKEN@*/)
+                                        .frame(
+                                            width: geometry.size.width,
+                                            height: calculatedBottomHeight(for: index)
+                                        )
+                                        .position(
+                                            x: geometry.size.width / 2,
+                                            y: calculatedBottomPosition(for: index)
+                                        )
+                                        .offset(calculatedBottomOffset(for: index))
                                     
                                     ZStack {
                                         ZStack {
