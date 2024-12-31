@@ -2,7 +2,7 @@ import SwiftUI
 import PhotosUI
 
 enum HandleSizes: CGFloat {
-    case sign = 10
+    case sign = 6
     case visible = 30
     case safeArea = 50
 }
@@ -199,7 +199,7 @@ struct ImageScrollView: View {
                                             print(2)
                                         }
                                     Rectangle()
-                                        .fill(.green).opacity(/*@START_MENU_TOKEN@*/0.8/*@END_MENU_TOKEN@*/)
+                                        .fill(.black)
                                         .frame(
                                             width: geometry.size.width,
                                             height: calculatedHeight(for: index)
@@ -237,7 +237,7 @@ struct ImageScrollView: View {
                                     )
                                     
                                     Rectangle()
-                                        .fill(.green).opacity(/*@START_MENU_TOKEN@*/0.8/*@END_MENU_TOKEN@*/)
+                                        .fill(.black)
                                         .frame(
                                             width: geometry.size.width,
                                             height: calculatedBottomHeight(for: index)
