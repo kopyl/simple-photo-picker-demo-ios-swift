@@ -70,13 +70,16 @@ struct CropHandlePositions {
     var currentTop: CGFloat
     var initialBottom: CGFloat
     var currentBottom: CGFloat
+    var xPosition: CGFloat
 
-    init(_ _initialTop: CGFloat, _ _initialBottom: CGFloat) {
+    init(_ _initialTop: CGFloat, _ _initialBottom: CGFloat, _ _xPosition: CGFloat) {
         self.initialTop = _initialTop
         self.currentTop = _initialTop
         
         self.initialBottom = _initialBottom
         self.currentBottom = _initialBottom
+        
+        self.xPosition = _xPosition
     }
 
     var top: (initial: CGFloat, current: CGFloat, min: CGFloat, max: CGFloat) {
@@ -125,6 +128,43 @@ struct CropHandlePositions {
     }
 }
 
+
+struct CropHandle: View {
+    enum HandlePlacement {
+        case top, bottom
+    }
+    var placement: HandlePlacement
+    @Binding var handlePositions: CropHandlePositions
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(placement == .top ? .blue : .red)
+                .frame(width: HandleSizes.visible.rawValue, height: HandleSizes.visible.rawValue)
+                
+            Circle()
+                .fill(.clear)
+                .contentShape(Circle())
+        }
+        .frame(width: HandleSizes.safeArea.rawValue, height: HandleSizes.safeArea.rawValue, alignment: .center)
+        .position(
+            x: handlePositions.xPosition,
+            y: placement == .top ? handlePositions.top.max : handlePositions.bottom.min
+        )
+        .gesture(
+            DragGesture()
+                .onChanged { value in
+                    if placement == .top {
+                        handlePositions.top.current = value.location.y
+                    } else {
+                        handlePositions.bottom.current = value.location.y
+                    }
+                }
+        )
+    }
+}
+
+
 struct ImageScrollView: View {
     @Binding var displayImages: [UIImage]
     @Binding var contentPhotoInScrollViewIndex: Int
@@ -152,50 +192,20 @@ struct ImageScrollView: View {
                                             let imageSize = calculateImageSize(for: displayImages[index], in: geometry.size)
                                             let topPositionY = (geometry.size.height - imageSize.height) / 2
                                             let bottomPositionY = topPositionY + imageSize.height
-                                            handlePositions[index] = CropHandlePositions(topPositionY, bottomPositionY)
+                                            let handleX = geometry.size.width / 2
+                                            handlePositions[index] = CropHandlePositions(topPositionY, bottomPositionY, handleX)
                                         }
-
-                                    ZStack {
-                                        Circle()
-                                            .fill(Color.blue)
-                                            .frame(width: HandleSizes.visible.rawValue, height: HandleSizes.visible.rawValue)
-                                            
-                                        Circle()
-                                            .fill(.clear)
-                                            .contentShape(Circle())
-                                    }
-                                    .frame(width: HandleSizes.safeArea.rawValue, height: HandleSizes.safeArea.rawValue, alignment: .center)
-                                    .position(
-                                        x: geometry.size.width / 2,
-                                        y: handlePositions[index]?.top.max ?? 0
-                                    )
-                                    .gesture(
-                                        DragGesture()
-                                            .onChanged { value in
-                                                handlePositions[index]?.top.current = value.location.y
-                                            }
-                                    )
                                     
-                                    ZStack {
-                                        Circle()
-                                            .fill(Color.red)
-                                            .frame(width: HandleSizes.visible.rawValue, height: HandleSizes.visible.rawValue)
-                                            
-                                        Circle()
-                                            .fill(.clear)
-                                            .contentShape(Circle())
+                                    if let hp = handlePositions[index] {
+                                        CropHandle(placement: .top, handlePositions: Binding(
+                                            get: { hp },
+                                            set: { handlePositions[index] = $0 }
+                                        ))
+                                        CropHandle(placement: .bottom, handlePositions: Binding(
+                                            get: { hp },
+                                            set: { handlePositions[index] = $0 }
+                                        ))
                                     }
-                                    .frame(width: HandleSizes.safeArea.rawValue, height: HandleSizes.safeArea.rawValue, alignment: .center)
-                                    .position(
-                                        x: geometry.size.width / 2,
-                                        y: handlePositions[index]?.bottom.min ?? 0
-                                    )
-                                    .gesture(
-                                        DragGesture()
-                                            .onChanged { value in
-                                                handlePositions[index]?.bottom.current = value.location.y
-                                            }
-                                    )
                                 }
                             }
                             .frame(width: geometry.size.width, height: geometry.size.height)
