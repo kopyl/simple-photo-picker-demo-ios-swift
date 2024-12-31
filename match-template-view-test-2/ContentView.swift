@@ -455,24 +455,11 @@ extension UIImage {
     }
 }
 
-extension UIImage {
-    func normalizeUsingBase64() -> UIImage? {
-        guard let imageData = self.jpegData(compressionQuality: .zero ) else {
-            return nil
-        }
-        let base64String = imageData.base64EncodedString()
-        guard let decodedData = Data(base64Encoded: base64String) else {
-            return nil
-        }
-        return UIImage(data: decodedData)?.fixedOrientation()
-    }
-}
-
 func cropImage(_ image: UIImage, x: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat) -> UIImage? {
     let rectToCrop = CGRect(x: x, y: y, width: width, height: height)
     let rect = CGRect(x: rectToCrop.origin.x, y: rectToCrop.origin.y, width: rectToCrop.width, height: rectToCrop.height)
 
-    guard let cropped = image.normalizeUsingBase64()?.cgImage?.cropping(to: rect) else {
+    guard let cropped = image.fixedOrientation()?.cgImage?.cropping(to: rect) else {
         return nil
     }
     return UIImage(cgImage: cropped, scale: image.scale, orientation: .up)
