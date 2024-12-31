@@ -90,8 +90,7 @@ struct ImageScrollView: View {
                 .scrollTargetLayout()
                 .onPreferenceChange(ScrollOffsetKey.self) { contentOffset in
                     let index = Int((contentOffset + geometry.size.width / 2) / geometry.size.width)
-                    contentPhotoInScrollViewIndex = min(max(index, 0), displayImages.count - 1)
-                    print(index)
+                    contentPhotoInScrollViewIndex = min(index, displayImages.count - 1)
                 }
                 .scrollTargetBehavior(.viewAligned)
             }
@@ -102,12 +101,12 @@ struct ImageScrollView: View {
 struct PhotosPickerView: View {
     @Binding var selectedItems: [PhotosPickerItem]
     @Binding var displayImages: [UIImage]
-    @Binding var wasAtLeastOnePhotoWasEverDisplayed: Bool
+    @Binding var contentPhotoInScrollViewIndex: Int
     
-    init(_ selectedItems: Binding<[PhotosPickerItem]>, _ displayImages: Binding<[UIImage]>, _ wasAtLeastOnePhotoWasEverDisplayed: Binding<Bool>) {
+    init(_ selectedItems: Binding<[PhotosPickerItem]>, _ displayImages: Binding<[UIImage]>, _ contentPhotoInScrollViewIndex: Binding<Int>) {
             self._selectedItems = selectedItems
             self._displayImages = displayImages
-            self._wasAtLeastOnePhotoWasEverDisplayed = wasAtLeastOnePhotoWasEverDisplayed
+            self._contentPhotoInScrollViewIndex = contentPhotoInScrollViewIndex
         }
     
     var body: some View {
@@ -135,7 +134,7 @@ struct PhotosPickerView: View {
                         }
                     }
                     withAnimation(.linear(duration: 0.25)) {
-                        wasAtLeastOnePhotoWasEverDisplayed = true
+                        contentPhotoInScrollViewIndex = displayImages.count - 1
                     }
                     selectedItems = []
                 }
@@ -146,7 +145,6 @@ struct PhotosPickerView: View {
 struct ContentView: View {
     @State private var displayImages: [UIImage] = []
     @State private var selectedItems: [PhotosPickerItem] = []
-    @State private var wasAtLeastOnePhotoWasEverDisplayed = false
     @State private var contentPhotoInScrollViewIndex: Int = -1
     
     var body: some View {
@@ -154,15 +152,14 @@ struct ContentView: View {
             ImageScrollView($displayImages, $contentPhotoInScrollViewIndex)
             Spacer()
             HStack(spacing: 0){
-                if wasAtLeastOnePhotoWasEverDisplayed {
+                if contentPhotoInScrollViewIndex != -1 {
                     ButtonStyled("arrow.down.square", "Save", .secondary, .leadingPadding) {
                         UIImageWriteToSavedPhotosAlbum(displayImages[displayImages.count - 1 - contentPhotoInScrollViewIndex], nil, nil, nil)
                        }
                 }
                 Spacer()
-                PhotosPickerView($selectedItems, $displayImages, $wasAtLeastOnePhotoWasEverDisplayed)
+                PhotosPickerView($selectedItems, $displayImages, $contentPhotoInScrollViewIndex)
             }
-            
         }
     }
 }
