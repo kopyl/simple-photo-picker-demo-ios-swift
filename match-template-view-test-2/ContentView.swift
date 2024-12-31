@@ -9,30 +9,54 @@ struct ScrollOffsetKey: PreferenceKey {
 }
 
 struct ButtonStyled: View {
-    var action: () -> Void
+    enum Importance {
+        case primary
+        case secondary
+    }
+    
+    enum Padding {
+        case leadingPadding
+        case trailingPadding
+    }
+    
     var icon: String
     var text: String
-    var isSecondary: Bool = false
-    var padding: Edge.Set = .leading
+    var importance: Importance
+    var padding: Padding
+    var action: ()->() = {}
+    
+    init(
+        _ icon: String,
+        _ text: String,
+        _ _is: Importance = .primary,
+        _ padding: Padding = .leadingPadding,
+        action: @escaping ()->() = {})
+    {
+        self.icon = icon
+        self.text = text
+        self.importance = _is
+        self.padding = padding
+        self.action = action
+    }
     
     var body: some View {
         Button(action: action) {
             HStack {
-                Image(systemName: icon)
+                Image(systemName: icon + ".fill")
                     .font(.system(size: 20))
                 Text(text)
                     .font(.system(size: 16))
             }
         }
         .padding()
-        .background(isSecondary ? .blue.opacity(0.1) : .blue)
-        .foregroundColor(isSecondary ? .blue : .white)
+        .background(importance == .secondary ? .blue.opacity(0.1) : .blue)
+        .foregroundColor(importance == .secondary ? .blue : .white)
         .cornerRadius(8)
         .opacity(1)
-        .disabled(isSecondary ? false : true)
+        .disabled(importance == .secondary ? false : true)
         .controlSize(.large)
         .transition(.move(edge: .bottom).combined(with: .opacity))
-        .padding(padding, 30)
+        .padding(padding == .leadingPadding ? Edge.Set.leading : Edge.Set.trailing, 30)
     }
 }
 
@@ -92,12 +116,7 @@ struct PhotosPickerView: View {
             selectionBehavior: .ordered,
             photoLibrary: .shared()) {
                 HStack{
-                    ButtonStyled(
-                        action: {},
-                        icon: "photo.fill",
-                        text: "Pick a photo",
-                        isSecondary: false,
-                        padding: .trailing
+                    ButtonStyled("photo", "Pick a photo", .primary, .trailingPadding
                     )
                     
                 }
@@ -137,14 +156,9 @@ struct ContentView: View {
             Spacer()
             HStack(spacing: 0){
                 if wasAtLeastOnePhotoWasEverDisplayed {
-                    ButtonStyled(
-                        action: {
-                            UIImageWriteToSavedPhotosAlbum(displayImages[displayImages.count - 1 - contentPhotoInScrollViewIndex], nil, nil, nil)
-                        },
-                        icon: "arrow.down.square.fill",
-                        text: "Save",
-                        isSecondary: true
-                    )
+                    ButtonStyled("arrow.down.square", "Save", .secondary, .leadingPadding) {
+                        UIImageWriteToSavedPhotosAlbum(displayImages[displayImages.count - 1 - contentPhotoInScrollViewIndex], nil, nil, nil)
+                       }
                 }
                 Spacer()
                 PhotosPickerView($selectedItems, $displayImages, $wasAtLeastOnePhotoWasEverDisplayed)
