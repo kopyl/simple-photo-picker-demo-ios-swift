@@ -84,10 +84,10 @@ struct CropHandlePositions {
             var modifiedValue = newValue
             
             if modifiedValue.current >= bottom.current {
-                modifiedValue.current = bottom.current - 10
+                modifiedValue.current = bottom.current
             }
             else if modifiedValue.current >= bottom.initial {
-                modifiedValue.current = bottom.initial - 10
+                modifiedValue.current = bottom.initial
             }
             else {
                 initialTop = modifiedValue.initial
