@@ -64,6 +64,9 @@ struct ImageScrollView: View {
     @Binding var displayImages: [UIImage]
     @Binding var contentPhotoInScrollViewIndex: Int
     
+    @State private var topPositionY: CGFloat = -1.0
+    @State private var bottomPositionY: CGFloat = -1.0
+    
     init(_ displayImages: Binding<[UIImage]>, _ contentPhotoInScrollViewIndex: Binding<Int>) {
         self._displayImages = displayImages
         self._contentPhotoInScrollViewIndex = contentPhotoInScrollViewIndex
@@ -74,29 +77,86 @@ struct ImageScrollView: View {
             GeometryReader { geometry in
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 20) {
-                        ForEach(displayImages, id: \.self) { image in
-                            Image(uiImage: image)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: geometry.size.width, height: geometry.size.height)
-                                .background(GeometryReader { proxy in
-                                    Color.clear
-                                        .preference(key: ScrollOffsetKey.self, value: proxy.frame(in: .global).origin.x)
-                                })
+                        ForEach(displayImages.indices, id: \.self) { index in
+                                ZStack {
+                                    GeometryReader { imageGeometry in
+                                    // Image
+                                    Image(uiImage: displayImages[index])
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: geometry.size.width, height: geometry.size.height)
+                                        .onAppear{
+                                            let imageSize = calculateImageSize(for: displayImages[index], in: geometry.size)
+                                            topPositionY = (geometry.size.height - imageSize.height) / 2
+                                            bottomPositionY = topPositionY + imageSize.height
+                                        }
+
+                                    Circle()
+                                        .fill(Color.blue)
+                                        .frame(width: 30, height: 30)
+                                        .position(
+                                            x: geometry.size.width / 2,
+                                            y: topPositionY
+                                        )
+                                        .gesture(
+                                            DragGesture()
+                                                .onChanged { value in
+                                                    topPositionY = max(0, min(bottomPositionY, value.location.y))
+                                                }
+                                        )
+
+                                    Circle()
+                                        .fill(Color.red)
+                                        .frame(width: 30, height: 30)
+                                        .position(
+                                            x: geometry.size.width / 2,
+                                            y: bottomPositionY
+                                        )
+                                        .gesture(
+                                            DragGesture()
+                                                .onChanged { value in
+                                                    bottomPositionY = max(topPositionY, min(geometry.size.height, value.location.y))
+                                                }
+                                        )
+                                }
+                            }
                         }
                     }
                 }
                 .frame(width: geometry.size.width, height: geometry.size.height)
-                .scrollTargetLayout()
+                .onAppear {
+                    // Initialize positions if not set
+                    if topPositionY == -1.0 && bottomPositionY == -1.0 {
+                        let imageSize = calculateImageSize(for: displayImages.first!, in: geometry.size)
+                        topPositionY = (geometry.size.height - imageSize.height) / 2
+                        bottomPositionY = topPositionY + imageSize.height
+                    }
+                }
                 .onPreferenceChange(ScrollOffsetKey.self) { contentOffset in
                     let index = Int((contentOffset + geometry.size.width / 2) / geometry.size.width)
                     contentPhotoInScrollViewIndex = min(index, displayImages.count - 1)
                 }
-                .scrollTargetBehavior(.viewAligned)
             }
         }
     }
+    
+    // Helper function to calculate the image's actual size
+    private func calculateImageSize(for image: UIImage, in containerSize: CGSize) -> CGSize {
+        let aspectRatio = image.size.width / image.size.height
+        if containerSize.width / containerSize.height > aspectRatio {
+            // Image is constrained by height
+            let height = containerSize.height
+            let width = height * aspectRatio
+            return CGSize(width: width, height: height)
+        } else {
+            // Image is constrained by width
+            let width = containerSize.width
+            let height = width / aspectRatio
+            return CGSize(width: width, height: height)
+        }
+    }
 }
+
 
 struct PhotosPickerView: View {
     @Binding var selectedItems: [PhotosPickerItem]
@@ -145,6 +205,7 @@ struct ContentView: View {
     @State private var displayImages: [UIImage] = []
     @State private var selectedItems: [PhotosPickerItem] = []
     @State private var contentPhotoInScrollViewIndex: Int = -1
+    @State private var cropPositions: [CGFloat] = []
     
     var body: some View {
         VStack {
