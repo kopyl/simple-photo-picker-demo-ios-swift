@@ -3,7 +3,7 @@ import PhotosUI
 
 enum HandleSizes: CGFloat {
     case visible = 30
-    case safeArea = 80
+    case safeArea = 50
 }
 
 struct ScrollOffsetKey: PreferenceKey {
@@ -155,34 +155,47 @@ struct ImageScrollView: View {
                                             handlePositions[index] = CropHandlePositions(topPositionY, bottomPositionY)
                                         }
 
-                                    Circle()
-                                        .fill(Color.blue)
-                                        .frame(width: HandleSizes.safeArea.rawValue, height: HandleSizes.safeArea.rawValue)
-                                        .position(
-                                            x: geometry.size.width / 2,
-                                            y: handlePositions[index]?.top.max ?? 0
-                                        )
-                                        .gesture(
-                                            DragGesture()
-                                                .onChanged { value in
-                                                    handlePositions[index]?.top.current = value.location.y
-                                                }
-                                        )
-
-                                    Circle()
-                                        .fill(Color.red)
-                                        .frame(width: HandleSizes.safeArea.rawValue, height: HandleSizes.safeArea.rawValue
-                                        )
-                                        .position(
-                                            x: geometry.size.width / 2,
-                                            y: handlePositions[index]?.bottom.min ?? 0
-                                        )
-                                        .gesture(
-                                            DragGesture()
-                                                .onChanged { value in
-                                                    handlePositions[index]?.bottom.current = value.location.y
-                                                }
-                                        )
+                                    ZStack {
+                                        Circle()
+                                            .fill(Color.blue)
+                                            .frame(width: HandleSizes.visible.rawValue, height: HandleSizes.visible.rawValue)
+                                            
+                                        Circle()
+                                            .fill(.clear)
+                                            .contentShape(Circle())
+                                    }
+                                    .frame(width: HandleSizes.safeArea.rawValue, height: HandleSizes.safeArea.rawValue, alignment: .center)
+                                    .position(
+                                        x: geometry.size.width / 2,
+                                        y: handlePositions[index]?.top.max ?? 0
+                                    )
+                                    .gesture(
+                                        DragGesture()
+                                            .onChanged { value in
+                                                handlePositions[index]?.top.current = value.location.y
+                                            }
+                                    )
+                                    
+                                    ZStack {
+                                        Circle()
+                                            .fill(Color.red)
+                                            .frame(width: HandleSizes.visible.rawValue, height: HandleSizes.visible.rawValue)
+                                            
+                                        Circle()
+                                            .fill(.clear)
+                                            .contentShape(Circle())
+                                    }
+                                    .frame(width: HandleSizes.safeArea.rawValue, height: HandleSizes.safeArea.rawValue, alignment: .center)
+                                    .position(
+                                        x: geometry.size.width / 2,
+                                        y: handlePositions[index]?.bottom.min ?? 0
+                                    )
+                                    .gesture(
+                                        DragGesture()
+                                            .onChanged { value in
+                                                handlePositions[index]?.bottom.current = value.location.y
+                                            }
+                                    )
                                 }
                             }
                             .frame(width: geometry.size.width, height: geometry.size.height)
