@@ -1,6 +1,11 @@
 import SwiftUI
 import PhotosUI
 
+enum HandleSizes: CGFloat {
+    case visible = 30
+    case safeArea = 80
+}
+
 struct ScrollOffsetKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
@@ -152,7 +157,7 @@ struct ImageScrollView: View {
 
                                     Circle()
                                         .fill(Color.blue)
-                                        .frame(width: 30, height: 30)
+                                        .frame(width: HandleSizes.safeArea.rawValue, height: HandleSizes.safeArea.rawValue)
                                         .position(
                                             x: geometry.size.width / 2,
                                             y: handlePositions[index]?.top.max ?? 0
@@ -166,7 +171,8 @@ struct ImageScrollView: View {
 
                                     Circle()
                                         .fill(Color.red)
-                                        .frame(width: 30, height: 30)
+                                        .frame(width: HandleSizes.safeArea.rawValue, height: HandleSizes.safeArea.rawValue
+                                        )
                                         .position(
                                             x: geometry.size.width / 2,
                                             y: handlePositions[index]?.bottom.min ?? 0
