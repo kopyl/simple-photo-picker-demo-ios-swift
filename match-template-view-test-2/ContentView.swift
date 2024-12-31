@@ -1,16 +1,6 @@
 import SwiftUI
 import PhotosUI
 
-struct BorderedProminentButtonStyleOverride: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .padding()
-            .background(configuration.isPressed ? .blue.opacity(0.8) : .blue)
-            .foregroundColor(.white)
-            .cornerRadius(8)
-    }
-}
-
 struct ScrollOffsetKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
@@ -31,22 +21,44 @@ struct SaveButton: View {
     
     var body: some View {
         HStack(spacing: 0){
-            if wasAtLeastOnePhotoWasEverDisplayed {
-                Button {
-                    UIImageWriteToSavedPhotosAlbum(displayImages[displayImages.count - 1 - contentPhotoInScrollViewIndex], nil, nil, nil)
-                } label: {
-                    Image(systemName: "arrow.down.square.fill")
-                        .font(.system(size: 20))
-                    Text("Save")
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.blue.opacity(0.1))
-                .foregroundColor(.blue)
-                .controlSize(.large)
-                .padding(.leading, 30)
+            if !wasAtLeastOnePhotoWasEverDisplayed {
+                ButtonStyled(
+                    action: {
+                        UIImageWriteToSavedPhotosAlbum(displayImages[displayImages.count - 1 - contentPhotoInScrollViewIndex], nil, nil, nil)
+                    },
+                    icon: "arrow.down.square.fill",
+                    text: "Save",
+                    isSecondary: true
+                )
                 .transition(.move(edge: .bottom).combined(with: .opacity))
+                .padding(.leading, 30)
             }
         }
+    }
+}
+
+struct ButtonStyled: View {
+    var action: () -> Void
+    var icon: String
+    var text: String
+    var isSecondary: Bool = false
+    
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Image(systemName: icon)
+                    .font(.system(size: 20))
+                Text(text)
+                    .font(.system(size: 16))
+            }
+        }
+        .padding()
+        .background(isSecondary ? .blue.opacity(0.1) : .blue)
+        .foregroundColor(isSecondary ? .blue : .white)
+        .cornerRadius(8)
+        .opacity(1)
+        .disabled(true)
+        .controlSize(.large)
     }
 }
 
@@ -81,6 +93,7 @@ struct ImageScrollView: View {
                 .onPreferenceChange(ScrollOffsetKey.self) { contentOffset in
                     let index = Int((contentOffset + geometry.size.width / 2) / geometry.size.width)
                     contentPhotoInScrollViewIndex = min(max(index, 0), displayImages.count - 1)
+                    print(index)
                 }
                 .scrollTargetBehavior(.viewAligned)
             }
@@ -105,19 +118,13 @@ struct PhotosPickerView: View {
             selectionBehavior: .ordered,
             photoLibrary: .shared()) {
                 HStack{
-                    Button {
-                    }
-                    label: {
-                        HStack {
-                            Image(systemName: "photo.fill")
-                                .font(.system(size: 20))
-                            Text("Pick a photo")
-                        }
-                    }
-                    .controlSize(.large)
+                    ButtonStyled(
+                        action: {},
+                        icon: "photo.fill",
+                        text: "Pick a photo",
+                        isSecondary: false
+                    )
                     .padding(.trailing, 30)
-                    .disabled(true)
-                    .buttonStyle(BorderedProminentButtonStyleOverride())
                 }
             }
             .onChange(of: selectedItems) { oldval, newval in
