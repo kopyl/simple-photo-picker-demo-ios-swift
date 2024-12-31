@@ -72,7 +72,7 @@ struct ImageScrollView: View {
     }
     
     var body: some View {
-        if !displayImages.isEmpty {
+        if displayImages.isEmpty {
             GeometryReader { geometry in
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 20) {
