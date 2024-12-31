@@ -128,20 +128,24 @@ struct CropHandlePositions {
     }
 }
 
-
 struct CropHandle: View {
     enum HandlePlacement {
         case top, bottom
     }
+
     var placement: HandlePlacement
     @Binding var handlePositions: CropHandlePositions
+    init(_ placement: HandlePlacement, _ handlePositions: Binding<CropHandlePositions>) {
+        self.placement = placement
+        self._handlePositions = handlePositions
+    }
 
     var body: some View {
         ZStack {
             Circle()
                 .fill(placement == .top ? .blue : .red)
                 .frame(width: HandleSizes.visible.rawValue, height: HandleSizes.visible.rawValue)
-                
+
             Circle()
                 .fill(.clear)
                 .contentShape(Circle())
@@ -164,12 +168,79 @@ struct CropHandle: View {
     }
 }
 
+class CropHandleManager: ObservableObject {
+    @Published private var positions: [Int: CropHandlePositions] = [:]
+
+    func initializeHandlePositions(_ index: Int, _ topY: CGFloat, _ bottomY: CGFloat, _ handleX: CGFloat) {
+        if positions[index] == nil {
+            positions[index] = CropHandlePositions(topY, bottomY, handleX)
+        }
+    }
+    
+    func binding(for index: Int) -> Binding<CropHandlePositions> {
+        Binding(
+            get: { self.positions[index] ?? CropHandlePositions(0, 0, 0) },
+            set: { self.positions[index] = $0 }
+        )
+    }
+}
+
+struct CropHandleView: View {
+    let index: Int
+    let placement: CropHandle.HandlePlacement
+    @ObservedObject var viewModel: CropHandleViewModel
+    
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(placement == .top ? .blue : .red)
+                .frame(width: HandleSizes.visible.rawValue, height: HandleSizes.visible.rawValue)
+            
+            Circle()
+                .fill(.clear)
+                .contentShape(Circle())
+        }
+        .frame(width: HandleSizes.safeArea.rawValue, height: HandleSizes.safeArea.rawValue)
+        .position(getPosition())
+        .gesture(
+            DragGesture().onChanged { value in
+                viewModel.updateHandlePosition(
+                    index: index,
+                    isTop: placement == .top,
+                    newY: value.location.y
+                )
+            }
+        )
+    }
+    
+    private func getPosition() -> CGPoint {
+        guard let positions = viewModel.handlePositions[index] else { return .zero }
+        return CGPoint(
+            x: positions.xPosition,
+            y: placement == .top ? positions.top.current : positions.bottom.current
+        )
+    }
+}
+
+class CropHandleViewModel: ObservableObject {
+    @Published var handlePositions: [Int: CropHandlePositions] = [:]
+    
+    func updateHandlePosition(index: Int, isTop: Bool, newY: CGFloat) {
+        guard var positions = handlePositions[index] else { return }
+        if isTop {
+            positions.top.current = newY
+        } else {
+            positions.bottom.current = newY
+        }
+        handlePositions[index] = positions
+    }
+}
 
 struct ImageScrollView: View {
     @Binding var displayImages: [UIImage]
     @Binding var contentPhotoInScrollViewIndex: Int
     
-    @State private var handlePositions: [Int: CropHandlePositions] = [:]
+    @StateObject private var handleManager = CropHandleManager()
     
     init(_ displayImages: Binding<[UIImage]>, _ contentPhotoInScrollViewIndex: Binding<Int>) {
         self._displayImages = displayImages
@@ -182,31 +253,21 @@ struct ImageScrollView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 20) {
                         ForEach(displayImages.indices, id: \.self) { index in
-                            GeometryReader { imageGeometry in
-                                ZStack {
-                                    Image(uiImage: displayImages[index])
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: geometry.size.width, height: geometry.size.height)
-                                        .onAppear{
-                                            let imageSize = calculateImageSize(for: displayImages[index], in: geometry.size)
-                                            let topPositionY = (geometry.size.height - imageSize.height) / 2
-                                            let bottomPositionY = topPositionY + imageSize.height
-                                            let handleX = geometry.size.width / 2
-                                            handlePositions[index] = CropHandlePositions(topPositionY, bottomPositionY, handleX)
-                                        }
-                                    
-                                    if let hp = handlePositions[index] {
-                                        CropHandle(placement: .top, handlePositions: Binding(
-                                            get: { hp },
-                                            set: { handlePositions[index] = $0 }
-                                        ))
-                                        CropHandle(placement: .bottom, handlePositions: Binding(
-                                            get: { hp },
-                                            set: { handlePositions[index] = $0 }
-                                        ))
+                            ZStack {
+                                let image = displayImages[index]
+                                Image(uiImage: image)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: geometry.size.width, height: geometry.size.height)
+                                    .onAppear {
+                                        let imageSize = calculateImageSize(for: image, in: geometry.size)
+                                        let topY = (geometry.size.height - imageSize.height) / 2
+                                        let bottomY = topY + imageSize.height
+                                        let handleX = geometry.size.width / 2
+                                        handleManager.initializeHandlePositions(index, topY, bottomY, handleX)
                                     }
-                                }
+                                CropHandle(.top, handleManager.binding(for: index))
+                                CropHandle(.bottom, handleManager.binding(for: index))
                             }
                             .frame(width: geometry.size.width, height: geometry.size.height)
                         }
@@ -215,20 +276,6 @@ struct ImageScrollView: View {
                 .frame(width: geometry.size.width, height: geometry.size.height)
                 .scrollTargetLayout()
                 .scrollTargetBehavior(.viewAligned)
-                .onAppear {
-                    for index in displayImages.indices {
-                        if handlePositions[index]?.top.current == nil &&
-                        handlePositions[index]?.bottom.current == nil {
-                            let imageSize = calculateImageSize(for: displayImages[index], in: geometry.size)
-                            handlePositions[index]?.top.current = (geometry.size.height - imageSize.height) / 2
-                            handlePositions[index]?.bottom.current = handlePositions[index]?.top.current ?? 0.0 + imageSize.height
-                        }
-                    }
-                }
-                .onPreferenceChange(ScrollOffsetKey.self) { contentOffset in
-                    let index = Int((contentOffset + geometry.size.width / 2) / geometry.size.width)
-                    contentPhotoInScrollViewIndex = min(index, displayImages.count - 1)
-                }
             }
         }
     }
