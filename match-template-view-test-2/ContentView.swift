@@ -2,6 +2,7 @@ import SwiftUI
 import PhotosUI
 
 enum HandleSizes: CGFloat {
+    case sign = 10
     case visible = 30
     case safeArea = 50
 }
@@ -157,9 +158,14 @@ struct ImageScrollView: View {
                                         }
 
                                     ZStack {
-                                        Circle()
-                                            .fill(.blue)
-                                            .frame(width: HandleSizes.visible.rawValue, height: HandleSizes.visible.rawValue)
+                                        ZStack {
+                                            Circle()
+                                                .fill(.blue)
+                                                .frame(width: HandleSizes.visible.rawValue, height: HandleSizes.visible.rawValue)
+                                            Circle()
+                                                .fill(.white)
+                                                .frame(width: HandleSizes.sign.rawValue, height: HandleSizes.sign.rawValue)
+                                        }
                                             
                                         Rectangle()
                                             .fill(.clear)
@@ -178,9 +184,14 @@ struct ImageScrollView: View {
                                     )
                                     
                                     ZStack {
-                                        Circle()
-                                            .fill(.blue)
-                                            .frame(width: HandleSizes.visible.rawValue, height: HandleSizes.visible.rawValue)
+                                        ZStack {
+                                            Circle()
+                                                .fill(.blue)
+                                                .frame(width: HandleSizes.visible.rawValue, height: HandleSizes.visible.rawValue)
+                                            Circle()
+                                                .fill(.white)
+                                                .frame(width: HandleSizes.sign.rawValue, height: HandleSizes.sign.rawValue)
+                                        }
                                             
                                         Rectangle()
                                             .fill(.clear)
