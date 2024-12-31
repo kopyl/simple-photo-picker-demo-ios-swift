@@ -117,7 +117,6 @@ struct PhotosPickerView: View {
                 HStack{
                     ButtonStyled("photo", "Pick a photo", .primary, .trailingPadding
                     )
-                    
                 }
             }
             .onChange(of: selectedItems) { oldval, newval in
