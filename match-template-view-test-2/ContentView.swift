@@ -129,11 +129,12 @@ struct ImageScrollView: View {
     @Binding var displayImages: [UIImage]
     @Binding var contentPhotoInScrollViewIndex: Int
     
-    @State private var handlePositions: [Int: CropHandlePositions] = [:]
+    @Binding var handlePositions: [Int: CropHandlePositions]
     
-    init(_ displayImages: Binding<[UIImage]>, _ contentPhotoInScrollViewIndex: Binding<Int>) {
+    init(_ displayImages: Binding<[UIImage]>, _ contentPhotoInScrollViewIndex: Binding<Int>, _ handlePositions: Binding<[Int: CropHandlePositions]>) {
         self._displayImages = displayImages
         self._contentPhotoInScrollViewIndex = contentPhotoInScrollViewIndex
+        self._handlePositions = handlePositions
     }
     
     var body: some View {
@@ -282,21 +283,60 @@ struct PhotosPickerView: View {
     }
 }
 
+func cropImage(_ image: UIImage, toRect rect: CGRect) -> UIImage? {
+        guard let cgImage = image.cgImage else { return nil }
+        let scale = image.scale
+        let scaledRect = CGRect(
+            x: rect.origin.x * scale,
+            y: rect.origin.y * scale,
+            width: rect.size.width * scale,
+            height: rect.size.height * scale
+        )
+        guard let croppedCGImage = cgImage.cropping(to: scaledRect) else { return nil }
+        return UIImage(cgImage: croppedCGImage, scale: scale, orientation: image.imageOrientation)
+    }
+
 struct ContentView: View {
     @State private var displayImages: [UIImage] = []
     @State private var selectedItems: [PhotosPickerItem] = []
     @State private var contentPhotoInScrollViewIndex: Int = -1
-    @State private var cropPositions: [CGFloat] = []
+    @State private var handlePositions: [Int: CropHandlePositions] = [:]
     
     var body: some View {
         VStack {
-            ImageScrollView($displayImages, $contentPhotoInScrollViewIndex)
+            ImageScrollView($displayImages, $contentPhotoInScrollViewIndex, $handlePositions)
             Spacer()
             HStack(spacing: 0){
                 if contentPhotoInScrollViewIndex != -1 {
                     ButtonStyled("arrow.down.square", "Save", .secondary, .leadingPadding) {
-                        UIImageWriteToSavedPhotosAlbum(displayImages[displayImages.count - 1 - contentPhotoInScrollViewIndex], nil, nil, nil)
-                       }
+                        if let currentPhotoCropPosition = handlePositions[contentPhotoInScrollViewIndex] {
+                            let currentPhoto = displayImages[contentPhotoInScrollViewIndex]
+                            print(currentPhotoCropPosition.top, currentPhotoCropPosition.bottom)
+                            
+                            let pictureMiniatureHeight = currentPhotoCropPosition.bottom.max - currentPhotoCropPosition.top.min
+                            let ratioMiniToReal = currentPhoto.size.height / pictureMiniatureHeight
+                            
+                            let pictureMiniatureCropFromTop = currentPhotoCropPosition.top.current - currentPhotoCropPosition.top.min
+                            let remaningMiniatureHeight = pictureMiniatureHeight - pictureMiniatureCropFromTop
+                            
+                            let pictureMiniatureCropFromBottom = currentPhotoCropPosition.bottom.max - currentPhotoCropPosition.bottom.current
+                            let cropFromBottom = pictureMiniatureCropFromBottom * ratioMiniToReal
+                            
+                            let startCroppintAt = pictureMiniatureCropFromTop * ratioMiniToReal
+                            let remainingHeight = remaningMiniatureHeight * ratioMiniToReal - cropFromBottom
+
+                            if let imageCropped = cropImage(currentPhoto,
+                                toRect: CGRect(
+                                    x: 0,
+                                    y: startCroppintAt,
+                                    width: currentPhoto.size.width,
+                                    height: remainingHeight
+                                )
+                            ) {
+                                UIImageWriteToSavedPhotosAlbum(imageCropped, nil, nil, nil)
+                            }
+                        }
+                    }
                 }
                 Spacer()
                 PhotosPickerView($selectedItems, $displayImages, $contentPhotoInScrollViewIndex)
