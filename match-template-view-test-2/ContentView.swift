@@ -145,6 +145,14 @@ struct ImageScrollView: View {
             return CGSize(width: 0, height: offsetValue)
         }
     
+    private func calculatedHeight(for index: Int) -> CGFloat {
+        let currentTop = handlePositions[index]?.top.current ?? 0
+        let minTop = handlePositions[index]?.top.min ?? 0
+        let height = currentTop - minTop
+        return height
+//    height: (handlePositions[index]?.top.current ?? 0) - (handlePositions[index]?.top.min ?? 0),
+    }
+    
     
     var body: some View {
         if !displayImages.isEmpty {
@@ -171,8 +179,7 @@ struct ImageScrollView: View {
                                         .fill(.green).opacity(/*@START_MENU_TOKEN@*/0.8/*@END_MENU_TOKEN@*/)
                                         .frame(
                                             width: geometry.size.width,
-                                            height: (handlePositions[index]?.top.current ?? 0) - (handlePositions[index]?.top.min ?? 0),
-                                            alignment: .top
+                                            height: calculatedHeight(for: index)
                                         )
                                         .position(
                                             x: geometry.size.width / 2,
