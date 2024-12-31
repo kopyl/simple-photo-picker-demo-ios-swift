@@ -93,6 +93,12 @@ struct PhotosPickerView: View {
     @Binding var displayImages: [UIImage]
     @Binding var wasAtLeastOnePhotoWasEverDisplayed: Bool
     
+    init(_ selectedItems: Binding<[PhotosPickerItem]>, _ displayImages: Binding<[UIImage]>, _ wasAtLeastOnePhotoWasEverDisplayed: Binding<Bool>) {
+            self._selectedItems = selectedItems
+            self._displayImages = displayImages
+            self._wasAtLeastOnePhotoWasEverDisplayed = wasAtLeastOnePhotoWasEverDisplayed
+        }
+    
     var body: some View {
         PhotosPicker(
             selection: $selectedItems,
@@ -150,8 +156,7 @@ struct ContentView: View {
             if displayImages.isEmpty { Spacer() }
             HStack(spacing: 0){
                 SaveButton($displayImages, $contentPhotoInScrollViewIndex, $wasAtLeastOnePhotoWasEverDisplayed)
-
-                PhotosPickerView(selectedItems: $selectedItems, displayImages: $displayImages, wasAtLeastOnePhotoWasEverDisplayed: $wasAtLeastOnePhotoWasEverDisplayed)
+                PhotosPickerView($selectedItems, $displayImages, $wasAtLeastOnePhotoWasEverDisplayed)
             }
             
         }
