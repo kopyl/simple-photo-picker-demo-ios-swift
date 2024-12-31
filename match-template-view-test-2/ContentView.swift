@@ -54,6 +54,11 @@ struct ImageScrollView: View {
     @Binding var displayImages: [UIImage]
     @Binding var contentPhotoInScrollViewIndex: Int
     
+    init(_ displayImages: Binding<[UIImage]>, _ contentPhotoInScrollViewIndex: Binding<Int>) {
+        self._displayImages = displayImages
+        self._contentPhotoInScrollViewIndex = contentPhotoInScrollViewIndex
+    }
+    
     var body: some View {
         if !displayImages.isEmpty {
             GeometryReader { geometry in
@@ -92,10 +97,8 @@ struct ContentView: View {
     var body: some View {
         VStack {
 
-            ImageScrollView(displayImages: $displayImages, contentPhotoInScrollViewIndex: $contentPhotoInScrollViewIndex)
-            if displayImages.isEmpty {
-                Spacer()
-            }
+            ImageScrollView($displayImages, $contentPhotoInScrollViewIndex)
+            if displayImages.isEmpty { Spacer() }
             HStack(spacing: 0){
                 SaveButton($displayImages, $contentPhotoInScrollViewIndex, $wasAtLeastOnePhotoWasEverDisplayed)
 
