@@ -193,6 +193,10 @@ struct ImageScrollView: View {
                                         .resizable()
                                         .scaledToFit()
                                         .frame(width: geometry.size.width, height: geometry.size.height)
+                                        .background(GeometryReader { proxy in
+                                        Color.clear
+                                            .preference(key: ScrollOffsetKey.self, value: proxy.frame(in: .global).origin.x)
+                                        })
                                         .onAppear{
                                             let imageSize = calculateImageSize(for: displayImages[index], in: geometry.size)
                                             let topPositionY = (geometry.size.height - imageSize.height) / 2
@@ -335,6 +339,7 @@ struct ImageScrollView: View {
                 .onPreferenceChange(ScrollOffsetKey.self) { contentOffset in
                     let index = Int((contentOffset + geometry.size.width / 2) / geometry.size.width)
                     contentPhotoInScrollViewIndex = min(index, displayImages.count - 1)
+                    print("Changed to \(index)")
                 }
             }
         }
