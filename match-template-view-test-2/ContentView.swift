@@ -505,7 +505,7 @@ struct ContentView: View {
     
     func cropAllImagesStitchAndSaveOne() {
         var allCroppedPhotos: [UIImage] = []
-        for photoIdx in displayImages.indices {
+        for photoIdx in displayImages.indices.reversed() {
             
             guard let photoCropPositions = handlePositions[handlePositions.count-1-photoIdx] else {
                 return
