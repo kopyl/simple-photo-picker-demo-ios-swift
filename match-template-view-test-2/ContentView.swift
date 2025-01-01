@@ -508,7 +508,7 @@ struct ContentView: View {
                                     width: currentPhoto.size.width,
                                     height: remainingHeight
                             ) {
-                                UIImageWriteToSavedPhotosAlbum(imageCropped, nil, nil, nil)
+                                UIImageWriteToSavedPhotosAlbum(displayImages[displayImages.count - 1 - contentPhotoInScrollViewIndex], nil, nil, nil)
                             }
                         }
                     }
