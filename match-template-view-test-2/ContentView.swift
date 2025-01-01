@@ -366,11 +366,13 @@ struct PhotosPickerView: View {
     @Binding var selectedItems: [PhotosPickerItem]
     @Binding var displayImages: [UIImage]
     @Binding var contentPhotoInScrollViewIndex: Int
+    @Binding var handlePositions: [Int: CropHandlePositions]
     
-    init(_ selectedItems: Binding<[PhotosPickerItem]>, _ displayImages: Binding<[UIImage]>, _ contentPhotoInScrollViewIndex: Binding<Int>) {
+    init(_ selectedItems: Binding<[PhotosPickerItem]>, _ displayImages: Binding<[UIImage]>, _ contentPhotoInScrollViewIndex: Binding<Int>, _ handlePositions: Binding<[Int: CropHandlePositions]>) {
             self._selectedItems = selectedItems
             self._displayImages = displayImages
             self._contentPhotoInScrollViewIndex = contentPhotoInScrollViewIndex
+            self._handlePositions = handlePositions
         }
     
     var body: some View {
@@ -388,6 +390,7 @@ struct PhotosPickerView: View {
                 Task {
                     if oldval.count == 0 && displayImages.count > 0 {
                         displayImages.removeAll()
+                        handlePositions.removeAll()
                     }
                     for selectedItemOrder in 0..<selectedItems.count {
                         if let data = try? await selectedItems[selectedItemOrder].loadTransferable(type: Data.self),
@@ -517,7 +520,7 @@ struct ContentView: View {
                     }
                 }
                 Spacer()
-                PhotosPickerView($selectedItems, $displayImages, $contentPhotoInScrollViewIndex)
+                PhotosPickerView($selectedItems, $displayImages, $contentPhotoInScrollViewIndex, $handlePositions)
             }
         }
     }
