@@ -132,6 +132,8 @@ struct ImageScrollView: View {
     
     @Binding var handlePositions: [Int: CropHandlePositions]
     
+    @State private var cropHandleIsMoving: Bool = false
+    
     init(_ displayImages: Binding<[UIImage]>, _ contentPhotoInScrollViewIndex: Binding<Int>, _ handlePositions: Binding<[Int: CropHandlePositions]>) {
         self._displayImages = displayImages
         self._contentPhotoInScrollViewIndex = contentPhotoInScrollViewIndex
@@ -219,6 +221,12 @@ struct ImageScrollView: View {
                                                 .fill(.white)
                                                 .frame(width: HandleSizes.sign.rawValue, height: HandleSizes.sign.rawValue)
                                         }
+                                        .scaleEffect(
+                                            CGSize(
+                                                width: cropHandleIsMoving ? 0 : 1,
+                                                height: cropHandleIsMoving ? 0 : 1
+                                            ), anchor: .center
+                                        )
                                             
                                         Rectangle()
                                             .fill(.clear)
@@ -233,6 +241,14 @@ struct ImageScrollView: View {
                                         DragGesture()
                                             .onChanged { value in
                                                 handlePositions[index]?.top.current = value.location.y
+                                                withAnimation(.linear(duration: 0.05)) {
+                                                    cropHandleIsMoving = true
+                                                }
+                                            }
+                                            .onEnded { value in
+                                                withAnimation(.linear(duration: 0.05)) {
+                                                    cropHandleIsMoving = false
+                                                }
                                             }
                                     )
                                     
@@ -252,15 +268,30 @@ struct ImageScrollView: View {
                                         ZStack {
                                             Circle()
                                                 .fill(.blue)
+                                                
                                                 .frame(width: HandleSizes.visible.rawValue, height: HandleSizes.visible.rawValue)
                                             Circle()
                                                 .fill(.white)
-                                                .frame(width: HandleSizes.sign.rawValue, height: HandleSizes.sign.rawValue)
+                                                .frame(
+                                                    width: HandleSizes.sign.rawValue,
+                                                    height: HandleSizes.sign.rawValue
+                                                )
                                         }
+                                        .scaleEffect(
+                                            CGSize(
+                                                width: cropHandleIsMoving ? 0 : 1,
+                                                height: cropHandleIsMoving ? 0 : 1
+                                            ), anchor: .center
+                                        )
                                             
                                         Rectangle()
                                             .fill(.clear)
                                             .contentShape(Rectangle())
+                                            .onHover(perform: { hovering in
+                                                withAnimation(.linear(duration: 2)) {
+                                                    cropHandleIsMoving = true
+                                                }
+                                            })
                                     }
                                     .frame(width: geometry.size.width, height: HandleSizes.safeArea.rawValue, alignment: .center)
                                     .position(
@@ -271,10 +302,16 @@ struct ImageScrollView: View {
                                         DragGesture()
                                             .onChanged { value in
                                                 handlePositions[index]?.bottom.current = value.location.y
+                                                withAnimation(.linear(duration: 0.05)) {
+                                                    cropHandleIsMoving = true
+                                                }
                                             }
                                             .onEnded { value in
-                                                print(2)
+                                                withAnimation(.linear(duration: 0.05)) {
+                                                    cropHandleIsMoving = false
+                                                }
                                             }
+
                                     )
                                 }
                             }
