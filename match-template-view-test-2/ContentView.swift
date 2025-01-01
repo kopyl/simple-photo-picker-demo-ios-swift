@@ -481,11 +481,59 @@ func cropImage(_ image: UIImage, x: CGFloat, y: CGFloat, width: CGFloat, height:
     return UIImage(cgImage: cropped, scale: image.scale, orientation: .up)
 }
 
+func combineImagesVertically(images: [UIImage]) -> UIImage? {
+    guard !images.isEmpty else { return nil }
+    let totalHeight = images.reduce(0) { $0 + $1.size.height }
+    let maxWidth = images.max { $0.size.width < $1.size.width }?.size.width ?? 0
+    
+    let renderer = UIGraphicsImageRenderer(size: CGSize(width: maxWidth, height: totalHeight))
+    
+    return renderer.image { ctx in
+        var yOffset: CGFloat = 0
+        for image in images {
+            image.draw(at: CGPoint(x: 0, y: yOffset))
+            yOffset += image.size.height
+        }
+    }
+}
+
 struct ContentView: View {
     @State private var displayImages: [UIImage] = []
     @State private var selectedItems: [PhotosPickerItem] = []
     @State private var contentPhotoInScrollViewIndex: Int = -1
     @State private var handlePositions: [Int: CropHandlePositions] = [:]
+    
+    func cropAllImagesStitchAndSaveOne() {
+        var allCroppedPhotos: [UIImage] = []
+        for photoIdx in displayImages.indices {
+            
+            guard let photoCropPositions = handlePositions[handlePositions.count-1-photoIdx] else {
+                return
+            }
+            let photo = displayImages[displayImages.count-1-photoIdx]
+            
+            let pictureMiniatureHeight = photoCropPositions.bottom.max - photoCropPositions.top.min
+            let ratioMiniToReal = photo.size.height / pictureMiniatureHeight
+            let pictureMiniatureCropFromTop = photoCropPositions.top.current - photoCropPositions.top.min
+            let remaningMiniatureHeight = pictureMiniatureHeight - pictureMiniatureCropFromTop
+            let pictureMiniatureCropFromBottom = photoCropPositions.bottom.max - photoCropPositions.bottom.current
+            let cropFromBottom = pictureMiniatureCropFromBottom * ratioMiniToReal
+            let startCroppintAt = pictureMiniatureCropFromTop * ratioMiniToReal
+            let remainingHeight = remaningMiniatureHeight * ratioMiniToReal - cropFromBottom
+            if let imageCropped = cropImage(photo,
+                    x: 0,
+                    y: startCroppintAt,
+                    width: photo.size.width,
+                    height: remainingHeight
+            ) {
+                allCroppedPhotos.append(imageCropped)
+            }
+        }
+        guard let allImagesCombined = combineImagesVertically(images: allCroppedPhotos) else {
+            return
+        }
+        UIImageWriteToSavedPhotosAlbum(allImagesCombined, nil, nil, nil)
+    }
     
     var body: some View {
         VStack {
@@ -494,29 +542,7 @@ struct ContentView: View {
             HStack(spacing: 0){
                 if contentPhotoInScrollViewIndex != -1 {
                     ButtonStyled("arrow.down.square", "Save", .secondary, .leadingPadding) {
-                        if let currentPhotoCropPosition = handlePositions[handlePositions.count - 1 - contentPhotoInScrollViewIndex] {
-                            
-                            let currentPhoto = displayImages[displayImages.count - 1 - contentPhotoInScrollViewIndex]
-                            
-                            print(currentPhoto)
-                            
-                            let pictureMiniatureHeight = currentPhotoCropPosition.bottom.max - currentPhotoCropPosition.top.min
-                            let ratioMiniToReal = currentPhoto.size.height / pictureMiniatureHeight
-                            let pictureMiniatureCropFromTop = currentPhotoCropPosition.top.current - currentPhotoCropPosition.top.min
-                            let remaningMiniatureHeight = pictureMiniatureHeight - pictureMiniatureCropFromTop
-                            let pictureMiniatureCropFromBottom = currentPhotoCropPosition.bottom.max - currentPhotoCropPosition.bottom.current
-                            let cropFromBottom = pictureMiniatureCropFromBottom * ratioMiniToReal
-                            let startCroppintAt = pictureMiniatureCropFromTop * ratioMiniToReal
-                            let remainingHeight = remaningMiniatureHeight * ratioMiniToReal - cropFromBottom
-                            if let imageCropped = cropImage(currentPhoto,
-                                    x: 0,
-                                    y: startCroppintAt,
-                                    width: currentPhoto.size.width,
-                                    height: remainingHeight
-                            ) {
-                                UIImageWriteToSavedPhotosAlbum(imageCropped, nil, nil, nil)
-                            }
-                        }
+                        cropAllImagesStitchAndSaveOne()
                     }
                 }
                 Spacer()
