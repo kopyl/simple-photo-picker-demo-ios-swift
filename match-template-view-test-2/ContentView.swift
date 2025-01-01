@@ -540,7 +540,7 @@ struct ContentView: View {
             ImageScrollView($displayImages, $contentPhotoInScrollViewIndex, $handlePositions)
             Spacer()
             HStack(spacing: 0){
-                if contentPhotoInScrollViewIndex != -1 {
+                if !displayImages.isEmpty {
                     ButtonStyled("arrow.down.square", "Save", .secondary, .leadingPadding) {
                         cropAllImagesStitchAndSaveOne()
                     }
