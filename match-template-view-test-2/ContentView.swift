@@ -339,7 +339,9 @@ struct ImageScrollView: View {
                 .onPreferenceChange(ScrollOffsetKey.self) { contentOffset in
                     let index = Int((contentOffset + geometry.size.width / 2) / geometry.size.width)
                     contentPhotoInScrollViewIndex = min(index, displayImages.count - 1)
-                    print("Changed to \(index)")
+                    withAnimation(.linear(duration: 0.25)){
+                        cropHandleIsMoving = false
+                    }
                 }
             }
         }
