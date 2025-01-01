@@ -184,7 +184,7 @@ struct ImageScrollView: View {
             GeometryReader { geometry in
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 20) {
-                        ForEach(displayImages.indices, id: \.self) { index in
+                        ForEach(displayImages.indices, id: \.self) { (index: Range<Array<UIImage>.Index>.Element) in
                             GeometryReader { imageGeometry in
                                 ZStack {
                                     
