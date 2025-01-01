@@ -491,8 +491,11 @@ struct ContentView: View {
             HStack(spacing: 0){
                 if contentPhotoInScrollViewIndex != -1 {
                     ButtonStyled("arrow.down.square", "Save", .secondary, .leadingPadding) {
-                        if let currentPhotoCropPosition = handlePositions[contentPhotoInScrollViewIndex] {
-                            let currentPhoto = displayImages[contentPhotoInScrollViewIndex]
+                        if let currentPhotoCropPosition = handlePositions[handlePositions.count - 1 - contentPhotoInScrollViewIndex] {
+                            
+                            let currentPhoto = displayImages[displayImages.count - 1 - contentPhotoInScrollViewIndex]
+                            
+                            print(currentPhoto)
                             
                             let pictureMiniatureHeight = currentPhotoCropPosition.bottom.max - currentPhotoCropPosition.top.min
                             let ratioMiniToReal = currentPhoto.size.height / pictureMiniatureHeight
@@ -508,7 +511,7 @@ struct ContentView: View {
                                     width: currentPhoto.size.width,
                                     height: remainingHeight
                             ) {
-                                UIImageWriteToSavedPhotosAlbum(displayImages[displayImages.count - 1 - contentPhotoInScrollViewIndex], nil, nil, nil)
+                                UIImageWriteToSavedPhotosAlbum(imageCropped, nil, nil, nil)
                             }
                         }
                     }
