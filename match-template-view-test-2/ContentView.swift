@@ -495,6 +495,8 @@ func combineImagesVertically(images: [UIImage]) -> UIImage? {
             yOffset += image.size.height
         }
     }
+}
+
 func loadImage(from urlString: String, completion: @escaping (UIImage?) -> Void) {
     guard let url = URL(string: urlString) else {
         print("Invalid URL")
