@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		48506BC82D24F3900039AA8D /* sample-images in Resources */ = {isa = PBXBuildFile; fileRef = 48506BC72D24F3900039AA8D /* sample-images */; };
 		48CAC48B2D235694001F8A86 /* README in Resources */ = {isa = PBXBuildFile; fileRef = 48CAC48A2D235694001F8A86 /* README */; };
 		48DF3FF62D22D97B00F27110 /* match_template_view_test_2App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF3FF52D22D97B00F27110 /* match_template_view_test_2App.swift */; };
 		48DF3FF82D22D97B00F27110 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF3FF72D22D97B00F27110 /* ContentView.swift */; };
@@ -15,6 +16,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		48506BC72D24F3900039AA8D /* sample-images */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "sample-images"; sourceTree = "<group>"; };
 		48CAC48A2D235694001F8A86 /* README */ = {isa = PBXFileReference; lastKnownFileType = folder; path = README; sourceTree = "<group>"; };
 		48CAC48E2D2358AF001F8A86 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		48DF3FF22D22D97B00F27110 /* match-template-view-test-2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "match-template-view-test-2.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -56,6 +58,7 @@
 		48DF3FF42D22D97B00F27110 /* match-template-view-test-2 */ = {
 			isa = PBXGroup;
 			children = (
+				48506BC72D24F3900039AA8D /* sample-images */,
 				48DF3FF52D22D97B00F27110 /* match_template_view_test_2App.swift */,
 				48DF3FF72D22D97B00F27110 /* ContentView.swift */,
 				48DF3FF92D22D97D00F27110 /* Assets.xcassets */,
@@ -132,6 +135,7 @@
 			files = (
 				48CAC48B2D235694001F8A86 /* README in Resources */,
 				48DF3FFD2D22D97D00F27110 /* Preview Assets.xcassets in Resources */,
+				48506BC82D24F3900039AA8D /* sample-images in Resources */,
 				48DF3FFA2D22D97D00F27110 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

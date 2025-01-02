@@ -495,6 +495,31 @@ func combineImagesVertically(images: [UIImage]) -> UIImage? {
             yOffset += image.size.height
         }
     }
+func loadImage(from urlString: String, completion: @escaping (UIImage?) -> Void) {
+    guard let url = URL(string: urlString) else {
+        print("Invalid URL")
+        completion(nil)
+        return
+    }
+
+    // Asynchronous image loading
+    URLSession.shared.dataTask(with: url) { data, response, error in
+        if let error = error {
+            print("Error loading image: \(error.localizedDescription)")
+            completion(nil)
+            return
+        }
+
+        guard let data = data, let image = UIImage(data: data) else {
+            print("Failed to decode image data")
+            completion(nil)
+            return
+        }
+
+        DispatchQueue.main.async {
+            completion(image)
+        }
+    }.resume()
 }
 
 struct ContentView: View {
@@ -547,6 +572,13 @@ struct ContentView: View {
                 }
                 Spacer()
                 PhotosPickerView($selectedItems, $displayImages, $contentPhotoInScrollViewIndex, $handlePositions)
+            }
+        }
+        .onAppear {
+            loadImage(from: "https://raw.githubusercontent.com/kopyl/simple-photo-picker-demo-ios-swift/0df645988b54e27913db0ba58cac35e67b6f4fcf/match-template-view-test-2/sample-images/1.JPG") { loadedImage in
+                if let loadedImage {
+                    displayImages.append(loadedImage)
+                }
             }
         }
     }
