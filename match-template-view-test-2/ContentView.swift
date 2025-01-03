@@ -603,7 +603,7 @@ struct SaveButton: View {
         if !displayImages.isEmpty {
             ButtonStyled("arrow.down.square", "Save", .secondary) {
                 cropAllImagesStitchAndSaveOne()
-            }.padding(.leading, 10)
+            }.padding(.trailing, 10)
         }
     }
 }
@@ -620,8 +620,8 @@ struct ContentView: View {
             ImageScrollView($displayImages, $handlePositions)
             Spacer()
             HStack(spacing: 0){
-                SaveButton(displayImages: $displayImages, handlePositions: $handlePositions)
                 PhotosPickerView($selectedItems, $displayImages, $handlePositions)
+                SaveButton(displayImages: $displayImages, handlePositions: $handlePositions)
             }
         }
     }
