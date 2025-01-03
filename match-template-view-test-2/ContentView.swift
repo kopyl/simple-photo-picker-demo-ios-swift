@@ -299,7 +299,7 @@ struct ImageScrollView: View {
                                             .fill(.clear)
                                             .contentShape(Rectangle())
                                             .onHover(perform: { hovering in
-                                                withAnimation(.linear(duration: 5)) {
+                                                withAnimation(.linear(duration: 0.35)) {
                                                     cropHandleIsMoving = true
                                                 }
                                             })
@@ -394,7 +394,7 @@ struct PhotosPickerView: View {
             }
             .onChange(of: selectedItems) { oldval, newval in
                 Task {
-                    withAnimation(.linear(duration: 5)) {
+                    withAnimation(.linear(duration: 0.35)) {
                         cropperOpenTimesCount += 1
                     }
                     if oldval.count == 0 && displayImages.count > 0 {
