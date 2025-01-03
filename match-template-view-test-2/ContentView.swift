@@ -547,27 +547,12 @@ struct SaveButton: View {
     @Binding var displayImages: [UIImage]
     @Binding var handlePositions: [Int: CropHandlePositions]
     
-    func cropAllImagesStitchAndSaveOne() {
-        guard let windowScene = UIApplication.shared.connectedScenes.first(where: { $0 is UIWindowScene }) as? UIWindowScene,
-              let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow })
-        else {
-            return
-        }
-        
-        let LoadingNotificationView = AlertAppleMusic17View(icon: .spinnerSmall)
-        let SuccessNotificationView = AlertAppleMusic17View(title: "Added to photos", icon: .done)
-        let ErrorNotificationView = AlertAppleMusic17View(title: "Added to photos", icon: .error)
-        SuccessNotificationView.haptic = .success
-        ErrorNotificationView.haptic = .error
-        
-        LoadingNotificationView.present(on: keyWindow)
-
-
+    func cropAll() -> [UIImage] {
         var allCroppedPhotos: [UIImage] = []
         for photoIdx in displayImages.indices.reversed() {
-            
+
             guard let photoCropPositions = handlePositions[handlePositions.count-1-photoIdx] else {
-                return
+                return allCroppedPhotos
             }
             let photo = displayImages[displayImages.count-1-photoIdx]
             
@@ -588,6 +573,26 @@ struct SaveButton: View {
                 allCroppedPhotos.append(imageCropped)
             }
         }
+        return allCroppedPhotos
+    }
+    
+    func cropAllImagesStitchAndSaveOne() {
+        guard let windowScene = UIApplication.shared.connectedScenes.first(where: { $0 is UIWindowScene }) as? UIWindowScene,
+              let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow })
+        else {
+            return
+        }
+        
+        let LoadingNotificationView = AlertAppleMusic17View(icon: .spinnerSmall)
+        let SuccessNotificationView = AlertAppleMusic17View(title: "Added to photos", icon: .done)
+        let ErrorNotificationView = AlertAppleMusic17View(title: "Added to photos", icon: .error)
+        SuccessNotificationView.haptic = .success
+        ErrorNotificationView.haptic = .error
+        
+        LoadingNotificationView.present(on: keyWindow)
+
+
+        let allCroppedPhotos: [UIImage] = cropAll()
         guard let allImagesCombined = combineImagesVertically(images: allCroppedPhotos) else {
             return
         }
