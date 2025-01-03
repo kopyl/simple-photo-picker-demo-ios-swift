@@ -2,6 +2,13 @@ import SwiftUI
 import PhotosUI
 import AlertKit
 
+struct ScrollOffsetKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+
 enum HandleSizes: CGFloat {
     case sign = 6
     case visible = 30
@@ -185,6 +192,10 @@ struct ImageScrollView: View {
                                         .resizable()
                                         .scaledToFit()
                                         .frame(width: geometry.size.width, height: geometry.size.height)
+                                        .background(GeometryReader { proxy in
+                                        Color.clear
+                                            .preference(key: ScrollOffsetKey.self, value: proxy.frame(in: .global).origin.x)
+                                        })
                                         .onAppear{
                                             let imageSize = calculateImageSize(for: displayImages[index], in: geometry.size)
                                             let topPositionY = (geometry.size.height - imageSize.height) / 2
@@ -322,6 +333,11 @@ struct ImageScrollView: View {
                             handlePositions[index]?.top.current = (geometry.size.height - imageSize.height) / 2
                             handlePositions[index]?.bottom.current = handlePositions[index]?.top.current ?? 0.0 + imageSize.height
                         }
+                    }
+                }
+                .onPreferenceChange(ScrollOffsetKey.self) { _ in
+                    withAnimation(.linear(duration: 0.25)){
+                        cropHandleIsMoving = false
                     }
                 }
             }
