@@ -140,7 +140,7 @@ public class AlertAppleMusic17View: UIView, AlertViewProtocol, AlertViewInternal
         #if os(visionOS)
         frame.origin.y = viewForPresent.safeAreaInsets.top + 24
         #elseif os(iOS)
-        frame.origin.y = viewForPresent.frame.height - viewForPresent.safeAreaInsets.bottom - frame.height - 64
+        frame.origin.y = viewForPresent.safeAreaInsets.top
         #endif
         
         transform = transform.scaledBy(x: self.presentDismissScale, y: self.presentDismissScale)
