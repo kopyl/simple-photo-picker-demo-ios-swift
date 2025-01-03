@@ -632,9 +632,20 @@ struct ContentView: View {
 
     
     var body: some View {
+        if cropperOpenTimesCount == 0 {
+            VStack {
+                VStack {
+                    Image(uiImage: UIImage(named: "logo")!).resizable().frame(width: 22.42, height: 24.18)
+                    Text("sitchy")
+                }.padding(.top, 50)
+                Text("Crop and stitch screenshots vertically").font(.system(size: 21)).padding(.top, 52)
+                Spacer()
+                Image(uiImage: UIImage(named: "welcome-screen-illustration")!).padding(.bottom, 10)
+            }
+            .transition(.move(edge: .leading))
+        }
         VStack {
             ImageScrollView(cropperOpenTimesCount: $cropperOpenTimesCount, $displayImages, $handlePositions)
-            Spacer()
             HStack(spacing: 0){
                 PhotosPickerView(cropperOpenTimesCount: $cropperOpenTimesCount, $selectedItems, $displayImages, $handlePositions)
                 SaveButton(displayImages: $displayImages, handlePositions: $handlePositions, cropperOpenTimesCount: $cropperOpenTimesCount)
