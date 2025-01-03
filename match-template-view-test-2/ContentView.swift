@@ -63,16 +63,16 @@ struct ButtonStyled: View {
                         .animation(.linear(duration: 2))
                 }
             }
+            .frame(maxWidth: isShrinkened ? .zero : .infinity)
+            .padding()
+            .padding(.leading, 15).padding(.trailing, 15)
+            .background(importance == .secondary ? .blue.opacity(0.1) : .blue)
+            .foregroundColor(importance == .secondary ? .blue : .white)
+            .cornerRadius(8)
+            .opacity(1)
+            .controlSize(.large)
+            .transition(.move(edge: .trailing).combined(with: .opacity))
         }
-        .frame(maxWidth: isShrinkened ? .zero : .infinity)
-        .padding()
-        .padding(.leading, 15).padding(.trailing, 15)
-        .background(importance == .secondary ? .blue.opacity(0.1) : .blue)
-        .foregroundColor(importance == .secondary ? .blue : .white)
-        .cornerRadius(8)
-        .opacity(1)
-        .controlSize(.large)
-        .transition(.move(edge: .trailing).combined(with: .opacity))
     }
 }
 
