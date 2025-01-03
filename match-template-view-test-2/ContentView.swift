@@ -548,6 +548,21 @@ struct SaveButton: View {
     @Binding var handlePositions: [Int: CropHandlePositions]
     
     func cropAllImagesStitchAndSaveOne() {
+        guard let windowScene = UIApplication.shared.connectedScenes.first(where: { $0 is UIWindowScene }) as? UIWindowScene,
+              let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow })
+        else {
+            return
+        }
+        
+        let LoadingNotificationView = AlertAppleMusic17View(icon: .spinnerSmall)
+        let SuccessNotificationView = AlertAppleMusic17View(title: "Added to photos", icon: .done)
+        let ErrorNotificationView = AlertAppleMusic17View(title: "Added to photos", icon: .error)
+        SuccessNotificationView.haptic = .success
+        ErrorNotificationView.haptic = .error
+        
+        LoadingNotificationView.present(on: keyWindow)
+
+
         var allCroppedPhotos: [UIImage] = []
         for photoIdx in displayImages.indices.reversed() {
             
@@ -576,20 +591,13 @@ struct SaveButton: View {
         guard let allImagesCombined = combineImagesVertically(images: allCroppedPhotos) else {
             return
         }
-        
-        
-        savePhoto(allImagesCombined) { success, error in
-            if success {
-                print("success")
-                AlertKitAPI.present(
-                    title: "Added to photos",
-                    icon: .done,
-                    style: .iOS16AppleMusic,
-                    haptic: .success
-                )
 
+        savePhoto(allImagesCombined) { success, error in
+            LoadingNotificationView.dismiss()
+            if success {
+                SuccessNotificationView.present(on: keyWindow)
             } else {
-                print("error")
+                ErrorNotificationView.present(on: keyWindow)
             }
         }
     }
@@ -609,6 +617,7 @@ struct ContentView: View {
     @State private var selectedItems: [PhotosPickerItem] = []
     @State private var contentPhotoInScrollViewIndex: Int = -1
     @State private var handlePositions: [Int: CropHandlePositions] = [:]
+
     
     var body: some View {
         VStack {
