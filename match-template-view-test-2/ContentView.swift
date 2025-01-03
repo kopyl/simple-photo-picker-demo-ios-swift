@@ -8,13 +8,6 @@ enum HandleSizes: CGFloat {
     case safeArea = 50
 }
 
-struct ScrollOffsetKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
-    }
-}
-
 struct ButtonStyled: View {
     enum Importance {
         case primary
@@ -129,15 +122,13 @@ struct CropHandlePositions {
 
 struct ImageScrollView: View {
     @Binding var displayImages: [UIImage]
-    @Binding var contentPhotoInScrollViewIndex: Int
     
     @Binding var handlePositions: [Int: CropHandlePositions]
     
     @State private var cropHandleIsMoving: Bool = false
     
-    init(_ displayImages: Binding<[UIImage]>, _ contentPhotoInScrollViewIndex: Binding<Int>, _ handlePositions: Binding<[Int: CropHandlePositions]>) {
+    init(_ displayImages: Binding<[UIImage]>, _ handlePositions: Binding<[Int: CropHandlePositions]>) {
         self._displayImages = displayImages
-        self._contentPhotoInScrollViewIndex = contentPhotoInScrollViewIndex
         self._handlePositions = handlePositions
     }
     
@@ -194,10 +185,6 @@ struct ImageScrollView: View {
                                         .resizable()
                                         .scaledToFit()
                                         .frame(width: geometry.size.width, height: geometry.size.height)
-                                        .background(GeometryReader { proxy in
-                                        Color.clear
-                                            .preference(key: ScrollOffsetKey.self, value: proxy.frame(in: .global).origin.x)
-                                        })
                                         .onAppear{
                                             let imageSize = calculateImageSize(for: displayImages[index], in: geometry.size)
                                             let topPositionY = (geometry.size.height - imageSize.height) / 2
@@ -337,13 +324,6 @@ struct ImageScrollView: View {
                         }
                     }
                 }
-                .onPreferenceChange(ScrollOffsetKey.self) { contentOffset in
-                    let index = Int((contentOffset + geometry.size.width / 2) / geometry.size.width)
-                    contentPhotoInScrollViewIndex = min(index, displayImages.count - 1)
-                    withAnimation(.linear(duration: 0.25)){
-                        cropHandleIsMoving = false
-                    }
-                }
             }
         }
     }
@@ -366,13 +346,11 @@ struct ImageScrollView: View {
 struct PhotosPickerView: View {
     @Binding var selectedItems: [PhotosPickerItem]
     @Binding var displayImages: [UIImage]
-    @Binding var contentPhotoInScrollViewIndex: Int
     @Binding var handlePositions: [Int: CropHandlePositions]
     
-    init(_ selectedItems: Binding<[PhotosPickerItem]>, _ displayImages: Binding<[UIImage]>, _ contentPhotoInScrollViewIndex: Binding<Int>, _ handlePositions: Binding<[Int: CropHandlePositions]>) {
+    init(_ selectedItems: Binding<[PhotosPickerItem]>, _ displayImages: Binding<[UIImage]>, _ handlePositions: Binding<[Int: CropHandlePositions]>) {
             self._selectedItems = selectedItems
             self._displayImages = displayImages
-            self._contentPhotoInScrollViewIndex = contentPhotoInScrollViewIndex
             self._handlePositions = handlePositions
         }
     
@@ -400,9 +378,6 @@ struct PhotosPickerView: View {
                                 displayImages.append(image)
                             }
                         }
-                    }
-                    withAnimation(.linear(duration: 0.25)) {
-                        contentPhotoInScrollViewIndex = displayImages.count - 1
                     }
                     selectedItems = []
                 }
@@ -620,18 +595,17 @@ struct SaveButton: View {
 struct ContentView: View {
     @State private var displayImages: [UIImage] = []
     @State private var selectedItems: [PhotosPickerItem] = []
-    @State private var contentPhotoInScrollViewIndex: Int = -1
     @State private var handlePositions: [Int: CropHandlePositions] = [:]
 
     
     var body: some View {
         VStack {
-            ImageScrollView($displayImages, $contentPhotoInScrollViewIndex, $handlePositions)
+            ImageScrollView($displayImages, $handlePositions)
             Spacer()
             HStack(spacing: 0){
                 SaveButton(displayImages: $displayImages, handlePositions: $handlePositions)
                 Spacer()
-                PhotosPickerView($selectedItems, $displayImages, $contentPhotoInScrollViewIndex, $handlePositions)
+                PhotosPickerView($selectedItems, $displayImages, $handlePositions)
             }
         }
     }
