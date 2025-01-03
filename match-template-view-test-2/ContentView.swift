@@ -55,6 +55,7 @@ struct ButtonStyled: View {
                     .font(.system(size: 16))
             }
         }
+        .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/)
         .padding()
         .background(importance == .secondary ? .blue.opacity(0.1) : .blue)
         .foregroundColor(importance == .secondary ? .blue : .white)
@@ -63,7 +64,6 @@ struct ButtonStyled: View {
         .disabled(importance == .secondary ? false : true)
         .controlSize(.large)
         .transition(.move(edge: .bottom).combined(with: .opacity))
-        .padding(padding == .leadingPadding ? Edge.Set.leading : Edge.Set.trailing, 30)
     }
 }
 
@@ -377,8 +377,9 @@ struct PhotosPickerView: View {
             matching: .not(.any(of: [.bursts, .cinematicVideos, .depthEffectPhotos, .livePhotos, .screenRecordings, .screenRecordings, .slomoVideos, .timelapseVideos, .videos])),
             photoLibrary: .shared()) {
                 HStack{
-                    ButtonStyled("photo", "Pick a photo", .primary, .trailingPadding
+                    ButtonStyled("photo", "Pick a photo", .primary
                     )
+                    .padding(.leading, 10).padding(.trailing, 10)
                 }
             }
             .onChange(of: selectedItems) { oldval, newval in
@@ -600,9 +601,9 @@ struct SaveButton: View {
     
     var body: some View {
         if !displayImages.isEmpty {
-            ButtonStyled("arrow.down.square", "Save", .secondary, .leadingPadding) {
+            ButtonStyled("arrow.down.square", "Save", .secondary) {
                 cropAllImagesStitchAndSaveOne()
-            }
+            }.padding(.leading, 10)
         }
     }
 }
@@ -620,7 +621,6 @@ struct ContentView: View {
             Spacer()
             HStack(spacing: 0){
                 SaveButton(displayImages: $displayImages, handlePositions: $handlePositions)
-                Spacer()
                 PhotosPickerView($selectedItems, $displayImages, $handlePositions)
             }
         }
