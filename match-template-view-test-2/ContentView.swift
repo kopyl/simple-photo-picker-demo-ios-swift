@@ -576,7 +576,7 @@ struct SaveButton: View {
         
         let LoadingNotificationView = AlertAppleMusic17View(icon: .spinnerSmall)
         let SuccessNotificationView = AlertAppleMusic17View(title: "Added to photos", icon: .done)
-        let ErrorNotificationView = AlertAppleMusic17View(title: "Added to photos", icon: .error)
+        let ErrorNotificationView = AlertAppleMusic17View(title: "Error occured", icon: .error)
         SuccessNotificationView.haptic = .success
         ErrorNotificationView.haptic = .error
         
