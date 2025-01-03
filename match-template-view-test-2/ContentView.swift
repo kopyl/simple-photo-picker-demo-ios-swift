@@ -60,7 +60,7 @@ struct ButtonStyled: View {
                 if !hideText {
                     Text(text)
                         .font(.system(size: 16))
-                        .animation(.linear(duration: 2))
+                        .transition(.move(edge: .leading))
                 }
             }
             .frame(maxWidth: isShrinkened ? .zero : .infinity)
@@ -71,7 +71,6 @@ struct ButtonStyled: View {
             .cornerRadius(8)
             .opacity(1)
             .controlSize(.large)
-            .transition(.move(edge: .trailing).combined(with: .opacity))
         }
     }
 }
@@ -138,14 +137,14 @@ struct CropHandlePositions {
 
 struct ImageScrollView: View {
     @Binding var displayImages: [UIImage]
-    
     @Binding var handlePositions: [Int: CropHandlePositions]
-    
+    @Binding var cropperOpenTimesCount: Int
     @State private var cropHandleIsMoving: Bool = false
     
-    init(_ displayImages: Binding<[UIImage]>, _ handlePositions: Binding<[Int: CropHandlePositions]>) {
+    init(cropperOpenTimesCount: Binding<Int>, _ displayImages: Binding<[UIImage]>, _ handlePositions: Binding<[Int: CropHandlePositions]>) {
         self._displayImages = displayImages
         self._handlePositions = handlePositions
+        self._cropperOpenTimesCount = cropperOpenTimesCount
     }
     
     private func calculatedOffsetForTopImageCroppingOverlay(for index: Int) -> CGSize {
@@ -188,7 +187,7 @@ struct ImageScrollView: View {
     
     
     var body: some View {
-        if !displayImages.isEmpty {
+        if cropperOpenTimesCount > 0 {
             GeometryReader { geometry in
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 20) {
@@ -300,7 +299,7 @@ struct ImageScrollView: View {
                                             .fill(.clear)
                                             .contentShape(Rectangle())
                                             .onHover(perform: { hovering in
-                                                withAnimation(.linear(duration: 2)) {
+                                                withAnimation(.linear(duration: 5)) {
                                                     cropHandleIsMoving = true
                                                 }
                                             })
@@ -372,11 +371,13 @@ struct PhotosPickerView: View {
     @Binding var selectedItems: [PhotosPickerItem]
     @Binding var displayImages: [UIImage]
     @Binding var handlePositions: [Int: CropHandlePositions]
+    @Binding var cropperOpenTimesCount: Int
     
-    init(_ selectedItems: Binding<[PhotosPickerItem]>, _ displayImages: Binding<[UIImage]>, _ handlePositions: Binding<[Int: CropHandlePositions]>) {
+    init(cropperOpenTimesCount: Binding<Int>, _ selectedItems: Binding<[PhotosPickerItem]>, _ displayImages: Binding<[UIImage]>, _ handlePositions: Binding<[Int: CropHandlePositions]>) {
             self._selectedItems = selectedItems
             self._displayImages = displayImages
             self._handlePositions = handlePositions
+            self._cropperOpenTimesCount = cropperOpenTimesCount
         }
     
     var body: some View {
@@ -386,13 +387,16 @@ struct PhotosPickerView: View {
             matching: .not(.any(of: [.bursts, .cinematicVideos, .depthEffectPhotos, .livePhotos, .screenRecordings, .screenRecordings, .slomoVideos, .timelapseVideos, .videos])),
             photoLibrary: .shared()) {
                 HStack{
-                    ButtonStyled("photo", "Pick a photo", _is:  !displayImages.isEmpty ? .secondary : .primary, hideText: !displayImages.isEmpty, isShrinkened: !displayImages.isEmpty
+                    ButtonStyled("photo", "Pick a photo", _is:  cropperOpenTimesCount > 0 ? .secondary : .primary, hideText: cropperOpenTimesCount > 0, isShrinkened: cropperOpenTimesCount > 0
                     ).disabled(/*@START_MENU_TOKEN@*/true/*@END_MENU_TOKEN@*/)
                     .padding(.leading, 10).padding(.trailing, 10)
                 }
             }
             .onChange(of: selectedItems) { oldval, newval in
                 Task {
+                    withAnimation(.linear(duration: 5)) {
+                        cropperOpenTimesCount += 1
+                    }
                     if oldval.count == 0 && displayImages.count > 0 {
                         displayImages.removeAll()
                         handlePositions.removeAll()
@@ -400,9 +404,7 @@ struct PhotosPickerView: View {
                     for selectedItemOrder in 0..<selectedItems.count {
                         if let data = try? await selectedItems[selectedItemOrder].loadTransferable(type: Data.self),
                            let image = UIImage(data: data) {
-                            withAnimation(.linear(duration: 0.25)) {
-                                displayImages.append(image)
-                            }
+                            displayImages.append(image)
                         }
                     }
                     selectedItems = []
@@ -547,6 +549,7 @@ func savePhoto(_ image: UIImage, completion: @escaping (Bool, Error?) -> Void) {
 struct SaveButton: View {
     @Binding var displayImages: [UIImage]
     @Binding var handlePositions: [Int: CropHandlePositions]
+    @Binding var cropperOpenTimesCount: Int
     @State private var isSavingInProgress: Bool = false
     
     func cropAll() -> [UIImage] {
@@ -612,10 +615,10 @@ struct SaveButton: View {
     }
     
     var body: some View {
-        if !displayImages.isEmpty {
-            ButtonStyled("arrow.down.square", "Save", _is: .secondary) {
+        if cropperOpenTimesCount > 0 {
+            ButtonStyled("arrow.down.square", "Save", _is: .secondary, isShrinkened: cropperOpenTimesCount == 0) {
                 cropAllImagesStitchAndSaveOne()
-            }.padding(.trailing, 10).disabled(isSavingInProgress)
+            }.padding(.trailing, 10).disabled(isSavingInProgress).transition(.move(edge: .trailing).combined(with: .opacity))
         }
     }
 }
@@ -625,15 +628,16 @@ struct ContentView: View {
     @State private var displayImages: [UIImage] = []
     @State private var selectedItems: [PhotosPickerItem] = []
     @State private var handlePositions: [Int: CropHandlePositions] = [:]
+    @State private var cropperOpenTimesCount: Int = 0
 
     
     var body: some View {
         VStack {
-            ImageScrollView($displayImages, $handlePositions)
+            ImageScrollView(cropperOpenTimesCount: $cropperOpenTimesCount, $displayImages, $handlePositions)
             Spacer()
             HStack(spacing: 0){
-                PhotosPickerView($selectedItems, $displayImages, $handlePositions)
-                SaveButton(displayImages: $displayImages, handlePositions: $handlePositions)
+                PhotosPickerView(cropperOpenTimesCount: $cropperOpenTimesCount, $selectedItems, $displayImages, $handlePositions)
+                SaveButton(displayImages: $displayImages, handlePositions: $handlePositions, cropperOpenTimesCount: $cropperOpenTimesCount)
             }
         }
     }
