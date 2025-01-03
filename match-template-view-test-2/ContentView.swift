@@ -547,6 +547,7 @@ func savePhoto(_ image: UIImage, completion: @escaping (Bool, Error?) -> Void) {
 struct SaveButton: View {
     @Binding var displayImages: [UIImage]
     @Binding var handlePositions: [Int: CropHandlePositions]
+    @State private var isSavingInProgress: Bool = false
     
     func cropAll() -> [UIImage] {
         var allCroppedPhotos: [UIImage] = []
@@ -578,6 +579,7 @@ struct SaveButton: View {
     }
     
     func cropAllImagesStitchAndSaveOne() {
+        isSavingInProgress = true
         guard let windowScene = UIApplication.shared.connectedScenes.first(where: { $0 is UIWindowScene }) as? UIWindowScene,
               let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow })
         else {
@@ -600,6 +602,7 @@ struct SaveButton: View {
 
         savePhoto(allImagesCombined) { success, error in
             LoadingNotificationView.dismiss()
+            isSavingInProgress = false
             if success {
                 SuccessNotificationView.present(on: keyWindow)
             } else {
@@ -612,7 +615,7 @@ struct SaveButton: View {
         if !displayImages.isEmpty {
             ButtonStyled("arrow.down.square", "Save", _is: .secondary) {
                 cropAllImagesStitchAndSaveOne()
-            }.padding(.trailing, 10)
+            }.padding(.trailing, 10).disabled(isSavingInProgress)
         }
     }
 }
