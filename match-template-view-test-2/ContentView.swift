@@ -612,6 +612,17 @@ struct ContentView: View {
     @State private var displayImages: [UIImage] = []
     @State private var selectedItems: [PhotosPickerItem] = []
     @State private var handlePositions: [Int: CropHandlePositions] = [:]
+    
+    func showSpinner() {
+        guard let windowScene = UIApplication.shared.connectedScenes.first(where: { $0 is UIWindowScene }) as? UIWindowScene,
+              let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow })
+        else {
+            return
+        }
+        
+        let LoadingNotificationView = AlertAppleMusic17View(icon: .spinnerSmall)
+        LoadingNotificationView.present(on: keyWindow)
+    }
 
     
     var body: some View {
@@ -623,6 +634,9 @@ struct ContentView: View {
                 Spacer()
                 PhotosPickerView($selectedItems, $displayImages, $handlePositions)
             }
+        }
+        .onAppear {
+            showSpinner()
         }
     }
 }
