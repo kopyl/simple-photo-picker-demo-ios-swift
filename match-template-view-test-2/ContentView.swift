@@ -56,10 +56,10 @@ struct ButtonStyled: View {
         Button(action: action) {
             HStack {
                 Image(systemName: icon + ".fill")
-                    .font(.system(size: 20))
+                    .font(.system(size: 16))
                 if !hideText {
                     Text(text)
-                        .font(.system(size: 16))
+                        .font(.system(size: 14))
                         .transition(.move(edge: .leading))
                 }
             }
