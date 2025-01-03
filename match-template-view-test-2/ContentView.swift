@@ -413,7 +413,7 @@ struct PhotosPickerView: View {
     }
 }
 
-// sounrce:
+// source:
 // https://gist.github.com/schickling/b5d86cb070130f80bb40?permalink_comment_id=2894406#gistcomment-2894406
 extension UIImage {
     func fixedOrientation() -> UIImage? {
