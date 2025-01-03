@@ -30,19 +30,25 @@ struct ButtonStyled: View {
     var text: String
     var importance: Importance
     var padding: Padding
+    var hideText: Bool
+    var isShrinkened: Bool
     var action: ()->() = {}
     
     init(
         _ icon: String,
         _ text: String,
-        _ _is: Importance = .primary,
         _ padding: Padding = .leadingPadding,
+        _is: Importance = .primary,
+        hideText: Bool = false,
+        isShrinkened: Bool = false,
         action: @escaping ()->() = {})
     {
         self.icon = icon
         self.text = text
         self.importance = _is
         self.padding = padding
+        self.hideText = hideText
+        self.isShrinkened = isShrinkened
         self.action = action
     }
     
@@ -51,19 +57,22 @@ struct ButtonStyled: View {
             HStack {
                 Image(systemName: icon + ".fill")
                     .font(.system(size: 20))
-                Text(text)
-                    .font(.system(size: 16))
+                if !hideText { // Conditionally show or hide the text
+                    Text(text)
+                        .font(.system(size: 16))
+                        .animation(.linear(duration: 2))
+                }
             }
         }
-        .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/)
+        .frame(maxWidth: isShrinkened ? .zero : .infinity)
         .padding()
+        .padding(.leading, 15).padding(.trailing, 15)
         .background(importance == .secondary ? .blue.opacity(0.1) : .blue)
         .foregroundColor(importance == .secondary ? .blue : .white)
         .cornerRadius(8)
         .opacity(1)
-        .disabled(importance == .secondary ? false : true)
         .controlSize(.large)
-        .transition(.move(edge: .bottom).combined(with: .opacity))
+        .transition(.move(edge: .trailing).combined(with: .opacity))
     }
 }
 
@@ -377,8 +386,8 @@ struct PhotosPickerView: View {
             matching: .not(.any(of: [.bursts, .cinematicVideos, .depthEffectPhotos, .livePhotos, .screenRecordings, .screenRecordings, .slomoVideos, .timelapseVideos, .videos])),
             photoLibrary: .shared()) {
                 HStack{
-                    ButtonStyled("photo", "Pick a photo", .primary
-                    )
+                    ButtonStyled("photo", "Pick a photo", _is:  !displayImages.isEmpty ? .secondary : .primary, hideText: !displayImages.isEmpty, isShrinkened: !displayImages.isEmpty
+                    ).disabled(/*@START_MENU_TOKEN@*/true/*@END_MENU_TOKEN@*/)
                     .padding(.leading, 10).padding(.trailing, 10)
                 }
             }
@@ -601,7 +610,7 @@ struct SaveButton: View {
     
     var body: some View {
         if !displayImages.isEmpty {
-            ButtonStyled("arrow.down.square", "Save", .secondary) {
+            ButtonStyled("arrow.down.square", "Save", _is:  !displayImages.isEmpty ? .primary : .secondary) {
                 cropAllImagesStitchAndSaveOne()
             }.padding(.trailing, 10)
         }
