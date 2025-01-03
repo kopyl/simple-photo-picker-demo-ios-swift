@@ -3,16 +3,16 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		48660C2D2D2821390074C62A /* AlertKit in Frameworks */ = {isa = PBXBuildFile; productRef = 48660C2C2D2821390074C62A /* AlertKit */; };
 		48CAC48B2D235694001F8A86 /* README in Resources */ = {isa = PBXBuildFile; fileRef = 48CAC48A2D235694001F8A86 /* README */; };
 		48DF3FF62D22D97B00F27110 /* match_template_view_test_2App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF3FF52D22D97B00F27110 /* match_template_view_test_2App.swift */; };
 		48DF3FF82D22D97B00F27110 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF3FF72D22D97B00F27110 /* ContentView.swift */; };
 		48DF3FFA2D22D97D00F27110 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 48DF3FF92D22D97D00F27110 /* Assets.xcassets */; };
 		48DF3FFD2D22D97D00F27110 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 48DF3FFC2D22D97D00F27110 /* Preview Assets.xcassets */; };
-		48F713D22D27C22C009DBACD /* AlertKit in Frameworks */ = {isa = PBXBuildFile; productRef = 48F713D12D27C22C009DBACD /* AlertKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,7 +30,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				48F713D22D27C22C009DBACD /* AlertKit in Frameworks */,
+				48660C2D2D2821390074C62A /* AlertKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -91,7 +91,7 @@
 			);
 			name = "match-template-view-test-2";
 			packageProductDependencies = (
-				48F713D12D27C22C009DBACD /* AlertKit */,
+				48660C2C2D2821390074C62A /* AlertKit */,
 			);
 			productName = "match-template-view-test-2";
 			productReference = 48DF3FF22D22D97B00F27110 /* match-template-view-test-2.app */;
@@ -122,7 +122,7 @@
 			);
 			mainGroup = 48DF3FE92D22D97B00F27110;
 			packageReferences = (
-				48F713D02D27C22C009DBACD /* XCRemoteSwiftPackageReference "AlertKit" */,
+				48660C2B2D2821390074C62A /* XCLocalSwiftPackageReference "packages/AlertKit" */,
 			);
 			productRefGroup = 48DF3FF32D22D97B00F27110 /* Products */;
 			projectDirPath = "";
@@ -367,21 +367,16 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		48F713D02D27C22C009DBACD /* XCRemoteSwiftPackageReference "AlertKit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/sparrowcode/AlertKit";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.1.9;
-			};
+/* Begin XCLocalSwiftPackageReference section */
+		48660C2B2D2821390074C62A /* XCLocalSwiftPackageReference "packages/AlertKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = packages/AlertKit;
 		};
-/* End XCRemoteSwiftPackageReference section */
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		48F713D12D27C22C009DBACD /* AlertKit */ = {
+		48660C2C2D2821390074C62A /* AlertKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 48F713D02D27C22C009DBACD /* XCRemoteSwiftPackageReference "AlertKit" */;
 			productName = AlertKit;
 		};
 /* End XCSwiftPackageProductDependency section */
