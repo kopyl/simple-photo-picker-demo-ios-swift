@@ -102,7 +102,9 @@ public class AlertAppleMusic17View: UIView, AlertViewProtocol, AlertViewInternal
             addSubview(iconView)
         }
         
-        if subtitleLabel == nil {
+        if title == nil && subtitle == nil {
+            layoutMargins = .init(top: 60, left: 15, bottom: 60, right: 17 + ((icon == nil) ? .zero : 3))
+        } else if subtitleLabel == nil {
             layoutMargins = .init(top: 17, left: 15, bottom: 17, right: 15 + ((icon == nil) ? .zero : 3))
         } else {
             layoutMargins = .init(top: 15, left: 15, bottom: 15, right: 15 + ((icon == nil) ? .zero : 3))
