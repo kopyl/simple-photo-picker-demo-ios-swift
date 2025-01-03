@@ -29,8 +29,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "168"
             endingLineNumber = "168"
-            landmarkName = "body"
-            landmarkType = "24">
+            landmarkName = "calculatedHeightForBottomImageCroppingOverlay(for:)"
+            landmarkType = "7">
             <Locations>
                <Location
                   uuid = "7775EF70-0AA2-40DE-9A42-95D18998584D - a3593f2cd1c3930"
@@ -61,6 +61,21 @@
                   startingLineNumber = "168"
                   endingLineNumber = "168"
                   offsetFromSymbolStart = "740">
+               </Location>
+               <Location
+                  uuid = "7775EF70-0AA2-40DE-9A42-95D18998584D - e66d22f2baf45a90"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "match_template_view_test_2.ImageScrollView.calculatedHeightForBottomImageCroppingOverlay(for: Swift.Int) -&gt; CoreGraphics.CGFloat"
+                  moduleName = "match-template-view-test-2"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/olehkopyl/Dropbox/Development/Swift/iOS/match-template-view-test-2/match-template-view-test-2/ContentView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "168"
+                  endingLineNumber = "168"
+                  offsetFromSymbolStart = "468">
                </Location>
             </Locations>
          </BreakpointContent>

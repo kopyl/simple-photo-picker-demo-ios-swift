@@ -497,6 +497,50 @@ func combineImagesVertically(images: [UIImage]) -> UIImage? {
     }
 }
 
+func loadImage(from urlString: String, completion: @escaping (UIImage?) -> Void) {
+    guard let url = URL(string: urlString) else {
+        print("Invalid URL")
+        completion(nil)
+        return
+    }
+
+    URLSession.shared.dataTask(with: url) { data, response, error in
+        if let error = error {
+            print("Error loading image: \(error.localizedDescription)")
+            completion(nil)
+            return
+        }
+
+        guard let data = data, let image = UIImage(data: data) else {
+            print("Failed to decode image data")
+            completion(nil)
+            return
+        }
+
+        DispatchQueue.main.async {
+            completion(image)
+        }
+    }.resume()
+}
+
+func savePhoto(_ image: UIImage, completion: @escaping (Bool, Error?) -> Void) {
+    class CallbackWrapper: NSObject {
+        let completion: (Bool, Error?) -> Void
+
+        init(completion: @escaping (Bool, Error?) -> Void) {
+            self.completion = completion
+        }
+
+        @objc func completionHandler(image: UIImage, error: Error?, contextInfo: UnsafeMutableRawPointer) {
+            completion(error == nil, error)
+        }
+    }
+
+    let wrapper = CallbackWrapper(completion: completion)
+    UIImageWriteToSavedPhotosAlbum(image, wrapper, #selector(CallbackWrapper.completionHandler(image:error:contextInfo:)), nil)
+}
+
+
 struct ContentView: View {
     @State private var displayImages: [UIImage] = []
     @State private var selectedItems: [PhotosPickerItem] = []
@@ -532,7 +576,14 @@ struct ContentView: View {
         guard let allImagesCombined = combineImagesVertically(images: allCroppedPhotos) else {
             return
         }
-        UIImageWriteToSavedPhotosAlbum(allImagesCombined, nil, nil, nil)
+
+        savePhoto(allImagesCombined) { success, error in
+            if success {
+                print("success")
+            } else {
+                print("error")
+            }
+        }
     }
     
     var body: some View {
