@@ -1,5 +1,6 @@
 import SwiftUI
 import PhotosUI
+import AlertKit
 
 enum HandleSizes: CGFloat {
     case sign = 6
@@ -540,12 +541,9 @@ func savePhoto(_ image: UIImage, completion: @escaping (Bool, Error?) -> Void) {
     UIImageWriteToSavedPhotosAlbum(image, wrapper, #selector(CallbackWrapper.completionHandler(image:error:contextInfo:)), nil)
 }
 
-
-struct ContentView: View {
-    @State private var displayImages: [UIImage] = []
-    @State private var selectedItems: [PhotosPickerItem] = []
-    @State private var contentPhotoInScrollViewIndex: Int = -1
-    @State private var handlePositions: [Int: CropHandlePositions] = [:]
+struct SaveButton: View {
+    @Binding var displayImages: [UIImage]
+    @Binding var handlePositions: [Int: CropHandlePositions]
     
     func cropAllImagesStitchAndSaveOne() {
         var allCroppedPhotos: [UIImage] = []
@@ -576,10 +574,18 @@ struct ContentView: View {
         guard let allImagesCombined = combineImagesVertically(images: allCroppedPhotos) else {
             return
         }
-
+        
+        
         savePhoto(allImagesCombined) { success, error in
             if success {
                 print("success")
+                AlertKitAPI.present(
+                    title: "Added to photos",
+                    icon: .done,
+                    style: .iOS16AppleMusic,
+                    haptic: .success
+                )
+
             } else {
                 print("error")
             }
@@ -587,15 +593,27 @@ struct ContentView: View {
     }
     
     var body: some View {
+        if !displayImages.isEmpty {
+            ButtonStyled("arrow.down.square", "Save", .secondary, .leadingPadding) {
+                cropAllImagesStitchAndSaveOne()
+            }
+        }
+    }
+}
+
+
+struct ContentView: View {
+    @State private var displayImages: [UIImage] = []
+    @State private var selectedItems: [PhotosPickerItem] = []
+    @State private var contentPhotoInScrollViewIndex: Int = -1
+    @State private var handlePositions: [Int: CropHandlePositions] = [:]
+    
+    var body: some View {
         VStack {
             ImageScrollView($displayImages, $contentPhotoInScrollViewIndex, $handlePositions)
             Spacer()
             HStack(spacing: 0){
-                if !displayImages.isEmpty {
-                    ButtonStyled("arrow.down.square", "Save", .secondary, .leadingPadding) {
-                        cropAllImagesStitchAndSaveOne()
-                    }
-                }
+                SaveButton(displayImages: $displayImages, handlePositions: $handlePositions)
                 Spacer()
                 PhotosPickerView($selectedItems, $displayImages, $contentPhotoInScrollViewIndex, $handlePositions)
             }
