@@ -610,7 +610,7 @@ struct SaveButton: View {
     
     var body: some View {
         if !displayImages.isEmpty {
-            ButtonStyled("arrow.down.square", "Save", _is:  !displayImages.isEmpty ? .primary : .secondary) {
+            ButtonStyled("arrow.down.square", "Save", _is: .secondary) {
                 cropAllImagesStitchAndSaveOne()
             }.padding(.trailing, 10)
         }
