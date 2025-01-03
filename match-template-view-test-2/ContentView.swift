@@ -57,7 +57,7 @@ struct ButtonStyled: View {
             HStack {
                 Image(systemName: icon + ".fill")
                     .font(.system(size: 20))
-                if !hideText { // Conditionally show or hide the text
+                if !hideText {
                     Text(text)
                         .font(.system(size: 16))
                         .animation(.linear(duration: 2))
