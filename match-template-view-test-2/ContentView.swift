@@ -487,7 +487,9 @@ func combineImagesVertically(images: [UIImage]) -> UIImage? {
     let totalHeight = images.reduce(0) { $0 + $1.size.height }
     let maxWidth = images.max { $0.size.width < $1.size.width }?.size.width ?? 0
     
-    let renderer = UIGraphicsImageRenderer(size: CGSize(width: maxWidth, height: totalHeight))
+    let format = UIGraphicsImageRendererFormat()
+    format.scale = images[0].scale
+    let renderer = UIGraphicsImageRenderer(size: CGSize(width: maxWidth, height: totalHeight), format: format)
     
     return renderer.image { ctx in
         var yOffset: CGFloat = 0
