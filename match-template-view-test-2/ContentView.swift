@@ -100,11 +100,20 @@ struct CropHandlePositions {
             if updatedCurrent >= bottom.current {
                 updatedCurrent = bottom.current
             }
+            else if updatedCurrent >= bottom.initial {
+                updatedCurrent = bottom.initial
+            } else if updatedCurrent <= top.initial {
+                updatedCurrent = top.initial
+            }
             top.current = updatedCurrent
         } else {
             var updatedCurrent = current
             if updatedCurrent <= top.current {
                 updatedCurrent = top.current
+            } else if updatedCurrent <= top.initial {
+                updatedCurrent = top.initial
+            } else if updatedCurrent >= bottom.initial {
+                updatedCurrent = bottom.initial
             }
             bottom.current = updatedCurrent
         }
