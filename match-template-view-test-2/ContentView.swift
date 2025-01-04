@@ -266,6 +266,7 @@ struct PhotosPickerView: View {
     @Binding var displayImages: [UIImage]
     @Binding var handlePositions: [Int: CropHandlePositions]
     @Binding var cropperOpenTimesCount: Int
+    @State private var isPickerPresented = false
     
     init(cropperOpenTimesCount: Binding<Int>, _ selectedItems: Binding<[PhotosPickerItem]>, _ displayImages: Binding<[UIImage]>, _ handlePositions: Binding<[Int: CropHandlePositions]>) {
             self._selectedItems = selectedItems
@@ -275,35 +276,32 @@ struct PhotosPickerView: View {
         }
     
     var body: some View {
-        PhotosPicker(
-            selection: $selectedItems,
-            selectionBehavior: .ordered,
-            matching: .not(.any(of: [.bursts, .cinematicVideos, .depthEffectPhotos, .livePhotos, .screenRecordings, .screenRecordings, .slomoVideos, .timelapseVideos, .videos])),
-            photoLibrary: .shared()) {
-                HStack{
-                    ButtonStyled("photo", "Pick a photo", _is:  cropperOpenTimesCount > 0 ? .secondary : .primary, hideText: cropperOpenTimesCount > 0, isShrinkened: cropperOpenTimesCount > 0
-                    ).disabled(/*@START_MENU_TOKEN@*/true/*@END_MENU_TOKEN@*/)
-                    .padding(.leading, 10).padding(.trailing, 10)
-                }
-            }
-            .onChange(of: selectedItems) { oldval, newval in
-                Task {
-                    withAnimation(.linear(duration: 0.35)) {
-                        cropperOpenTimesCount += 1
-                    }
-                    if oldval.count == 0 && displayImages.count > 0 {
-                        displayImages.removeAll()
-                        handlePositions.removeAll()
-                    }
-                    for selectedItemOrder in 0..<selectedItems.count {
-                        if let data = try? await selectedItems[selectedItemOrder].loadTransferable(type: Data.self),
-                           let image = UIImage(data: data) {
-                            displayImages.append(image)
-                        }
-                    }
-                    selectedItems = []
-                }
-            }
+        ButtonStyled("photo", "Pick a photo", _is:  cropperOpenTimesCount > 0 ? .secondary : .primary, hideText: cropperOpenTimesCount > 0, isShrinkened: cropperOpenTimesCount > 0
+        ) {
+            isPickerPresented.toggle()
+            print("Photo picker was open")
+        }
+        .padding(.leading, 10).padding(.trailing, 10)
+        .photosPicker(isPresented: $isPickerPresented, selection: $selectedItems)
+        .onChange(of: selectedItems) { oldval, newval in
+           Task {
+               withAnimation(.linear(duration: 0.35)) {
+                   cropperOpenTimesCount += 1
+               }
+               if oldval.count == 0 && displayImages.count > 0 {
+                   displayImages.removeAll()
+                   handlePositions.removeAll()
+               }
+               for selectedItemOrder in 0..<selectedItems.count {
+                   if let data = try? await selectedItems[selectedItemOrder].loadTransferable(type: Data.self),
+                      let image = UIImage(data: data) {
+                       displayImages.append(image)
+                   }
+               }
+               selectedItems = []
+           }
+       }
+        
     }
 }
 
