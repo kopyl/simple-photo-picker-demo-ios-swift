@@ -166,57 +166,57 @@ struct ImageScrollView: View {
         }
 
         return ZStack{
-        Rectangle()
-            .fill(Color("overlay-crop-color"))
-            .frame(
-                width: geometry.size.width,
-                height: calculatedHeightForImageCroppingOverlay(for: index, side: side)
-            )
+            Rectangle()
+                .fill(Color("overlay-crop-color"))
+                .frame(
+                    width: geometry.size.width,
+                    height: calculatedHeightForImageCroppingOverlay(for: index, side: side)
+                )
+                .position(
+                    x: geometry.size.width / 2,
+                    y: calculatedPositionForImageCroppingOverlay(for: index, side: side)
+                )
+                .offset(calculatedOffsetForImageCroppingOverlay(for: index, side: side))
+
+            ZStack {
+                ZStack {
+                    Circle()
+                        .fill(.blue)
+                        .frame(width: HandleSizes.visible.rawValue, height: HandleSizes.visible.rawValue)
+                    Circle()
+                        .fill(.white)
+                        .frame(width: HandleSizes.sign.rawValue, height: HandleSizes.sign.rawValue)
+                }
+                .scaleEffect(
+                    CGSize(
+                        width: cropHandleIsMoving ? 0 : 1,
+                        height: cropHandleIsMoving ? 0 : 1
+                    ), anchor: .center
+                )
+                    
+                Rectangle()
+                    .fill(.clear)
+                    .contentShape(Rectangle())
+            }
+            .frame(width: geometry.size.width, height: HandleSizes.safeArea.rawValue, alignment: .center)
             .position(
                 x: geometry.size.width / 2,
-                y: calculatedPositionForImageCroppingOverlay(for: index, side: side)
+                y: handlePositions[index]?.position(for: side).current ?? 0
             )
-            .offset(calculatedOffsetForImageCroppingOverlay(for: index, side: side))
-
-        ZStack {
-            ZStack {
-                Circle()
-                    .fill(.blue)
-                    .frame(width: HandleSizes.visible.rawValue, height: HandleSizes.visible.rawValue)
-                Circle()
-                    .fill(.white)
-                    .frame(width: HandleSizes.sign.rawValue, height: HandleSizes.sign.rawValue)
-            }
-            .scaleEffect(
-                CGSize(
-                    width: cropHandleIsMoving ? 0 : 1,
-                    height: cropHandleIsMoving ? 0 : 1
-                ), anchor: .center
+            .gesture(
+                DragGesture()
+                    .onChanged { value in
+                        self.handlePositions[index]?.updatePosition(for: side, current: value.location.y)
+                        withAnimation(.linear(duration: 0.05)) {
+                            cropHandleIsMoving = true
+                        }
+                    }
+                    .onEnded { value in
+                        withAnimation(.linear(duration: 0.05)) {
+                            cropHandleIsMoving = false
+                        }
+                    }
             )
-                
-            Rectangle()
-                .fill(.clear)
-                .contentShape(Rectangle())
-        }
-        .frame(width: geometry.size.width, height: HandleSizes.safeArea.rawValue, alignment: .center)
-        .position(
-            x: geometry.size.width / 2,
-            y: handlePositions[index]?.position(for: side).current ?? 0
-        )
-        .gesture(
-            DragGesture()
-                .onChanged { value in
-                    self.handlePositions[index]?.updatePosition(for: side, current: value.location.y)
-                    withAnimation(.linear(duration: 0.05)) {
-                        cropHandleIsMoving = true
-                    }
-                }
-                .onEnded { value in
-                    withAnimation(.linear(duration: 0.05)) {
-                        cropHandleIsMoving = false
-                    }
-                }
-        )
         }
         .zIndex(zIndex)
     }
