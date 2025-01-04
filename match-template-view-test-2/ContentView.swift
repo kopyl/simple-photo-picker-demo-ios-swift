@@ -76,61 +76,49 @@ struct ButtonStyled: View {
 }
 
 struct CropHandlePositions {
-    var initialTop: CGFloat
-    var currentTop: CGFloat
-    var initialBottom: CGFloat
-    var currentBottom: CGFloat
+    struct Position {
+        var initial: CGFloat
+        var current: CGFloat
+
+        var _min: CGFloat {
+            return min(initial, current)
+        }
+        
+        var _max: CGFloat {
+            return max(initial, current)
+        }
+    }
+
+    var top: Position
+    var bottom: Position
 
     init(_ _initialTop: CGFloat, _ _initialBottom: CGFloat) {
-        self.initialTop = _initialTop
-        self.currentTop = _initialTop
-        
-        self.initialBottom = _initialBottom
-        self.currentBottom = _initialBottom
+        self.top = Position(initial: _initialTop, current: _initialTop)
+        self.bottom = Position(initial: _initialBottom, current: _initialBottom)
     }
 
-    var top: (initial: CGFloat, current: CGFloat, min: CGFloat, max: CGFloat) {
+    var p: [String: Position] {
         get {
-            let minTop = min(initialTop, currentTop)
-            let maxTop = max(initialTop, currentTop)
-            return (initialTop, currentTop, minTop, maxTop)
+            return [
+                "top": top,
+                "bottom": bottom
+            ]
         }
         set {
-            var modifiedValue = newValue
-            
-            if modifiedValue.current >= bottom.current {
-                modifiedValue.current = bottom.current
+            if let newTop = newValue["top"] {
+                var updatedTop = newTop
+                if updatedTop.current >= bottom.current {
+                    updatedTop.current = bottom.current
+                }
+                top = updatedTop
             }
-            else if modifiedValue.current >= bottom.initial {
-                modifiedValue.current = bottom.initial
+            if let newBottom = newValue["bottom"] {
+                var updatedBottom = newBottom
+                if updatedBottom.current <= top.current {
+                    updatedBottom.current = top.current
+                }
+                bottom = updatedBottom
             }
-            else {
-                initialTop = modifiedValue.initial
-                currentTop = modifiedValue.current
-            }
-        }
-    }
-
-    var bottom: (initial: CGFloat, current: CGFloat, min: CGFloat, max: CGFloat) {
-        get {
-            let minBottom = min(initialBottom, currentBottom)
-            let maxBottom = max(initialBottom, currentBottom)
-            return (initialBottom, currentBottom, minBottom, maxBottom)
-        }
-        set {
-            var modifiedValue = newValue
-            
-            if modifiedValue.current <= top.current {
-                modifiedValue.current = top.current
-            }
-            else if modifiedValue.current <= top.initial {
-                modifiedValue.current = top.initial
-            }
-            else {
-                initialBottom = modifiedValue.initial
-                currentBottom = modifiedValue.current
-            }
-            
         }
     }
 }
@@ -141,92 +129,49 @@ struct ImageScrollView: View {
     @Binding var cropperOpenTimesCount: Int
     @State private var cropHandleIsMoving: Bool = false
     
+    enum CropHandleSides: String {
+        case top
+        case bottom
+    }
+    
     init(cropperOpenTimesCount: Binding<Int>, _ displayImages: Binding<[UIImage]>, _ handlePositions: Binding<[Int: CropHandlePositions]>) {
         self._displayImages = displayImages
         self._handlePositions = handlePositions
         self._cropperOpenTimesCount = cropperOpenTimesCount
     }
     
-    private func calculatedOffsetForTopImageCroppingOverlay(for index: Int) -> CGSize {
-            let currentTop = handlePositions[index]?.top.current ?? 0
-            let minTop = handlePositions[index]?.top.min ?? 0
-            let offsetValue = (currentTop - minTop) - (currentTop - minTop) / 2
-            return CGSize(width: 0, height: offsetValue)
-        }
-    
-    private func calculatedOffsetForBottomImageCroppingOverlay(for index: Int) -> CGSize {
-            let currentBottom = handlePositions[index]?.bottom.current ?? 0
-            let maxBottom = handlePositions[index]?.bottom.max ?? 0
-            let offsetValue = (currentBottom - maxBottom) - (currentBottom - maxBottom) / 2
-            return CGSize(width: 0, height: offsetValue)
-        }
-    
-    private func calculatedHeightForTopImageCroppingOverlay(for index: Int) -> CGFloat {
-        let currentTop = handlePositions[index]?.top.current ?? 0
-        let minTop = handlePositions[index]?.top.min ?? 0
-        let height = currentTop - minTop
-        return height
+    private func calculatedOffsetForImageCroppingOverlay(for index: Int, side: CropHandleSides) -> CGSize {
+        let current = handlePositions[index]?.p[side.rawValue]?.current ?? 0
+        let initial = handlePositions[index]?.p[side.rawValue]?.initial ?? 0
+        let offset = -(initial-current)/2
+        return CGSize(width: 0, height: offset)
     }
     
-    private func calculatedHeightForBottomImageCroppingOverlay(for index: Int) -> CGFloat {
-        let currentBottom = handlePositions[index]?.bottom.current ?? 0
-        let maxBottom = handlePositions[index]?.bottom.max ?? 0
-        let height = maxBottom - currentBottom
-        return height
+    private func calculatedHeightForImageCroppingOverlay(for index: Int, side: CropHandleSides) -> CGFloat {
+        let _min = handlePositions[index]?.p[side.rawValue]?._min ?? 0
+        let _max = handlePositions[index]?.p[side.rawValue]?._max ?? 0
+        return _max - _min
     }
     
-    private func calculatedPositionForTopImageCroppingOverlay(for index: Int) -> CGFloat {
-        let minTop = handlePositions[index]?.top.min ?? 0
-        return minTop
-    }
-    
-    private func calculatedPositionForBottomImageCroppingOverlay(for index: Int) -> CGFloat {
-        let maxBottom = handlePositions[index]?.bottom.max ?? 0
-        return maxBottom
-    }
-    
-    enum CropHandleSides {
-        case top
-        case bottom
+    private func calculatedPositionForImageCroppingOverlay(for index: Int, side: CropHandleSides) -> CGFloat {
+        let initial = handlePositions[index]?.p[side.rawValue]?.initial ?? 0
+        return initial
     }
     
     private func getCropHandleView(side: CropHandleSides, geometry: GeometryProxy, handlePositions: [Int: CropHandlePositions], index: Int) -> some View {
-        
-        let yPosition: CGFloat = {
-            switch side {
-            case .top:
-                return handlePositions[index]?.top.max ?? 0
-            case .bottom:
-                return handlePositions[index]?.bottom.min ?? 0
-            }
-        }()
-        
-        var getHeightFunction: (Int) -> CGFloat
-        var getPositionFunction: (Int) -> CGFloat
-        var getOffsetFunction: (Int) -> CGSize
-        switch side {
-        case .top:
-            getHeightFunction = calculatedHeightForTopImageCroppingOverlay
-            getPositionFunction = calculatedPositionForTopImageCroppingOverlay
-            getOffsetFunction = calculatedOffsetForTopImageCroppingOverlay
-        case .bottom:
-            getHeightFunction = calculatedHeightForBottomImageCroppingOverlay
-            getPositionFunction = calculatedPositionForBottomImageCroppingOverlay
-            getOffsetFunction = calculatedOffsetForBottomImageCroppingOverlay
-        }
 
         return ZStack{
         Rectangle()
             .fill(Color("overlay-crop-color"))
             .frame(
                 width: geometry.size.width,
-                height: getHeightFunction(index)
+                height: calculatedHeightForImageCroppingOverlay(for: index, side: side)
             )
             .position(
                 x: geometry.size.width / 2,
-                y: getPositionFunction(index)
+                y: calculatedPositionForImageCroppingOverlay(for: index, side: side)
             )
-            .offset(getOffsetFunction(index))
+            .offset(calculatedOffsetForImageCroppingOverlay(for: index, side: side))
 
         ZStack {
             ZStack {
@@ -251,17 +196,12 @@ struct ImageScrollView: View {
         .frame(width: geometry.size.width, height: HandleSizes.safeArea.rawValue, alignment: .center)
         .position(
             x: geometry.size.width / 2,
-            y: yPosition
+            y: handlePositions[index]?.p[side.rawValue]?.current ?? 0
         )
         .gesture(
             DragGesture()
                 .onChanged { value in
-                    switch side {
-                    case .top:
-                        self.handlePositions[index]?.top.current = value.location.y
-                    case .bottom:
-                        self.handlePositions[index]?.bottom.current = value.location.y
-                    }
+                    self.handlePositions[index]?.p[side.rawValue]?.current = value.location.y
                     withAnimation(.linear(duration: 0.05)) {
                         cropHandleIsMoving = true
                     }
@@ -532,11 +472,11 @@ struct SaveButton: View {
             }
             let photo = displayImages[displayImages.count-1-photoIdx]
             
-            let pictureMiniatureHeight = photoCropPositions.bottom.max - photoCropPositions.top.min
+            let pictureMiniatureHeight = photoCropPositions.bottom._max - photoCropPositions.top._min
             let ratioMiniToReal = photo.size.height / pictureMiniatureHeight
-            let pictureMiniatureCropFromTop = photoCropPositions.top.current - photoCropPositions.top.min
+            let pictureMiniatureCropFromTop = photoCropPositions.top.current - photoCropPositions.top._min
             let remaningMiniatureHeight = pictureMiniatureHeight - pictureMiniatureCropFromTop
-            let pictureMiniatureCropFromBottom = photoCropPositions.bottom.max - photoCropPositions.bottom.current
+            let pictureMiniatureCropFromBottom = photoCropPositions.bottom._max - photoCropPositions.bottom.current
             let cropFromBottom = pictureMiniatureCropFromBottom * ratioMiniToReal
             let startCroppintAt = pictureMiniatureCropFromTop * ratioMiniToReal
             let remainingHeight = remaningMiniatureHeight * ratioMiniToReal - cropFromBottom
