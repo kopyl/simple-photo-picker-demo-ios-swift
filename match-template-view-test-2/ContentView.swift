@@ -73,6 +73,11 @@ struct ButtonStyled: View {
     }
 }
 
+enum CropHandleSides: String {
+    case top
+    case bottom
+}
+
 struct CropHandlePositions {
     struct Position {
         var initial: CGFloat
@@ -84,17 +89,19 @@ struct CropHandlePositions {
 
     var top: Position
     var bottom: Position
+    var lastSideInteractedWith: CropHandleSides
 
     init(_ initialTop: CGFloat, _ initialBottom: CGFloat) {
         self.top = Position(initial: initialTop, current: initialTop)
         self.bottom = Position(initial: initialBottom, current: initialBottom)
+        self.lastSideInteractedWith = .top
     }
 
-    func position(for side: ImageScrollView.CropHandleSides) -> Position {
+    func position(for side: CropHandleSides) -> Position {
         return side == .top ? top : bottom
     }
 
-    mutating func updatePosition(for side: ImageScrollView.CropHandleSides, current: CGFloat) {
+    mutating func updatePosition(for side: CropHandleSides, current: CGFloat) {
         var updatedCurrent = current
         if side == .top {
             if updatedCurrent >= bottom.current {
@@ -104,6 +111,7 @@ struct CropHandlePositions {
                 updatedCurrent = top.initial
             }
             top.current = updatedCurrent
+            lastSideInteractedWith = .top
         } else {
             if updatedCurrent <= top.current {
                 updatedCurrent = top.current
@@ -112,6 +120,7 @@ struct CropHandlePositions {
                 updatedCurrent = bottom.initial
             }
             bottom.current = updatedCurrent
+            lastSideInteractedWith = .bottom
         }
     }
 }
@@ -121,11 +130,6 @@ struct ImageScrollView: View {
     @Binding var handlePositions: [Int: CropHandlePositions]
     @Binding var photoPickerOpenTimesCount: Int
     @State private var cropHandleIsMoving: Bool = false
-    
-    enum CropHandleSides: String {
-        case top
-        case bottom
-    }
     
     init(photoPickerOpenTimesCount: Binding<Int>, _ displayImages: Binding<[UIImage]>, _ handlePositions: Binding<[Int: CropHandlePositions]>) {
         self._displayImages = displayImages
@@ -152,6 +156,14 @@ struct ImageScrollView: View {
     }
     
     private func getCropHandleView(side: CropHandleSides, geometry: GeometryProxy, handlePositions: [Int: CropHandlePositions], index: Int) -> some View {
+        
+        var zIndex: Double {
+            if side == .top && handlePositions[index]?.lastSideInteractedWith == .top {
+                return 1
+            } else {
+                return 0
+            }
+        }
 
         return ZStack{
         Rectangle()
@@ -169,7 +181,7 @@ struct ImageScrollView: View {
         ZStack {
             ZStack {
                 Circle()
-                    .fill(.blue)
+                    .fill(side == .top ? .red : .blue)
                     .frame(width: HandleSizes.visible.rawValue, height: HandleSizes.visible.rawValue)
                 Circle()
                     .fill(.white)
@@ -206,6 +218,7 @@ struct ImageScrollView: View {
                 }
         )
         }
+        .zIndex(zIndex)
     }
 
     var body: some View {
@@ -231,8 +244,14 @@ struct ImageScrollView: View {
                                         }
                                     
                                     getCropHandleView(side: .top, geometry: geometry, handlePositions: handlePositions, index: index)
+//                                        .zIndex(
+//                                            handlePositions[index]?.lastSideInteractedWith == .top ? 1 : 0
+//                                        )
                                     
                                     getCropHandleView(side: .bottom, geometry: geometry, handlePositions: handlePositions, index: index)
+//                                        .zIndex(
+//                                            handlePositions[index]?.lastSideInteractedWith == .bottom ? 1 : 0
+//                                        )
                                 }
                             .frame(width: geometry.size.width, height: geometry.size.height)
                         }
