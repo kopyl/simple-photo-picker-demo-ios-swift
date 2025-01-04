@@ -185,6 +185,96 @@ struct ImageScrollView: View {
         return maxBottom
     }
     
+    enum CropHandleSides {
+        case top
+        case bottom
+    }
+    
+    private func getCropHandleView(side: CropHandleSides, geometry: GeometryProxy, handlePositions: [Int: CropHandlePositions], index: Int) -> some View {
+        
+        let yPosition: CGFloat = {
+            switch side {
+            case .top:
+                return handlePositions[index]?.top.max ?? 0
+            case .bottom:
+                return handlePositions[index]?.bottom.min ?? 0
+            }
+        }()
+        
+        var getHeightFunction: (Int) -> CGFloat
+        var getPositionFunction: (Int) -> CGFloat
+        var getOffsetFunction: (Int) -> CGSize
+        switch side {
+        case .top:
+            getHeightFunction = calculatedHeightForTopImageCroppingOverlay
+            getPositionFunction = calculatedPositionForTopImageCroppingOverlay
+            getOffsetFunction = calculatedOffsetForTopImageCroppingOverlay
+        case .bottom:
+            getHeightFunction = calculatedHeightForBottomImageCroppingOverlay
+            getPositionFunction = calculatedPositionForBottomImageCroppingOverlay
+            getOffsetFunction = calculatedOffsetForBottomImageCroppingOverlay
+        }
+
+        return ZStack{
+        Rectangle()
+            .fill(Color("overlay-crop-color"))
+            .frame(
+                width: geometry.size.width,
+                height: getHeightFunction(index)
+            )
+            .position(
+                x: geometry.size.width / 2,
+                y: getPositionFunction(index)
+            )
+            .offset(getOffsetFunction(index))
+
+        ZStack {
+            ZStack {
+                Circle()
+                    .fill(.blue)
+                    .frame(width: HandleSizes.visible.rawValue, height: HandleSizes.visible.rawValue)
+                Circle()
+                    .fill(.white)
+                    .frame(width: HandleSizes.sign.rawValue, height: HandleSizes.sign.rawValue)
+            }
+            .scaleEffect(
+                CGSize(
+                    width: cropHandleIsMoving ? 0 : 1,
+                    height: cropHandleIsMoving ? 0 : 1
+                ), anchor: .center
+            )
+                
+            Rectangle()
+                .fill(.clear)
+                .contentShape(Rectangle())
+        }
+        .frame(width: geometry.size.width, height: HandleSizes.safeArea.rawValue, alignment: .center)
+        .position(
+            x: geometry.size.width / 2,
+            y: yPosition
+        )
+        .gesture(
+            DragGesture()
+                .onChanged { value in
+                    switch side {
+                    case .top:
+                        self.handlePositions[index]?.top.current = value.location.y
+                    case .bottom:
+                        self.handlePositions[index]?.bottom.current = value.location.y
+                    }
+                    withAnimation(.linear(duration: 0.05)) {
+                        cropHandleIsMoving = true
+                    }
+                }
+                .onEnded { value in
+                    withAnimation(.linear(duration: 0.05)) {
+                        cropHandleIsMoving = false
+                    }
+                }
+        )
+        }
+    }
+    
     
     var body: some View {
         if cropperOpenTimesCount > 0 {
@@ -210,119 +300,10 @@ struct ImageScrollView: View {
                                             let bottomPositionY = topPositionY + imageSize.height
                                             handlePositions[index] = CropHandlePositions(topPositionY, bottomPositionY)
                                         }
-                                    Rectangle()
-                                        .fill(Color("overlay-crop-color"))
-                                        .frame(
-                                            width: geometry.size.width,
-                                            height: calculatedHeightForTopImageCroppingOverlay(for: index)
-                                        )
-                                        .position(
-                                            x: geometry.size.width / 2,
-                                            y: calculatedPositionForTopImageCroppingOverlay(for: index)
-                                        )
-                                        .offset(calculatedOffsetForTopImageCroppingOverlay(for: index))
-
-                                    ZStack {
-                                        ZStack {
-                                            Circle()
-                                                .fill(.blue)
-                                                .frame(width: HandleSizes.visible.rawValue, height: HandleSizes.visible.rawValue)
-                                            Circle()
-                                                .fill(.white)
-                                                .frame(width: HandleSizes.sign.rawValue, height: HandleSizes.sign.rawValue)
-                                        }
-                                        .scaleEffect(
-                                            CGSize(
-                                                width: cropHandleIsMoving ? 0 : 1,
-                                                height: cropHandleIsMoving ? 0 : 1
-                                            ), anchor: .center
-                                        )
-                                            
-                                        Rectangle()
-                                            .fill(.clear)
-                                            .contentShape(Rectangle())
-                                    }
-                                    .frame(width: geometry.size.width, height: HandleSizes.safeArea.rawValue, alignment: .center)
-                                    .position(
-                                        x: geometry.size.width / 2,
-                                        y: handlePositions[index]?.top.max ?? 0
-                                    )
-                                    .gesture(
-                                        DragGesture()
-                                            .onChanged { value in
-                                                handlePositions[index]?.top.current = value.location.y
-                                                withAnimation(.linear(duration: 0.05)) {
-                                                    cropHandleIsMoving = true
-                                                }
-                                            }
-                                            .onEnded { value in
-                                                withAnimation(.linear(duration: 0.05)) {
-                                                    cropHandleIsMoving = false
-                                                }
-                                            }
-                                    )
                                     
-                                    Rectangle()
-                                        .fill(Color("overlay-crop-color"))
-                                        .frame(
-                                            width: geometry.size.width,
-                                            height: calculatedHeightForBottomImageCroppingOverlay(for: index)
-                                        )
-                                        .position(
-                                            x: geometry.size.width / 2,
-                                            y: calculatedPositionForBottomImageCroppingOverlay(for: index)
-                                        )
-                                        .offset(calculatedOffsetForBottomImageCroppingOverlay(for: index))
+                                    getCropHandleView(side: .top, geometry: geometry, handlePositions: handlePositions, index: index)
                                     
-                                    ZStack {
-                                        ZStack {
-                                            Circle()
-                                                .fill(.blue)
-                                                
-                                                .frame(width: HandleSizes.visible.rawValue, height: HandleSizes.visible.rawValue)
-                                            Circle()
-                                                .fill(.white)
-                                                .frame(
-                                                    width: HandleSizes.sign.rawValue,
-                                                    height: HandleSizes.sign.rawValue
-                                                )
-                                        }
-                                        .scaleEffect(
-                                            CGSize(
-                                                width: cropHandleIsMoving ? 0 : 1,
-                                                height: cropHandleIsMoving ? 0 : 1
-                                            ), anchor: .center
-                                        )
-                                            
-                                        Rectangle()
-                                            .fill(.clear)
-                                            .contentShape(Rectangle())
-                                            .onHover(perform: { hovering in
-                                                withAnimation(.linear(duration: 0.35)) {
-                                                    cropHandleIsMoving = true
-                                                }
-                                            })
-                                    }
-                                    .frame(width: geometry.size.width, height: HandleSizes.safeArea.rawValue, alignment: .center)
-                                    .position(
-                                        x: geometry.size.width / 2,
-                                        y: handlePositions[index]?.bottom.min ?? 0
-                                    )
-                                    .gesture(
-                                        DragGesture()
-                                            .onChanged { value in
-                                                handlePositions[index]?.bottom.current = value.location.y
-                                                withAnimation(.linear(duration: 0.05)) {
-                                                    cropHandleIsMoving = true
-                                                }
-                                            }
-                                            .onEnded { value in
-                                                withAnimation(.linear(duration: 0.05)) {
-                                                    cropHandleIsMoving = false
-                                                }
-                                            }
-
-                                    )
+                                    getCropHandleView(side: .bottom, geometry: geometry, handlePositions: handlePositions, index: index)
                                 }
                             }
                             .frame(width: geometry.size.width, height: geometry.size.height)
