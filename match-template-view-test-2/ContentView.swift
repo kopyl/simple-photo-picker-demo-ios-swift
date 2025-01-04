@@ -95,8 +95,8 @@ struct CropHandlePositions {
     }
 
     mutating func updatePosition(for side: ImageScrollView.CropHandleSides, current: CGFloat) {
+        var updatedCurrent = current
         if side == .top {
-            var updatedCurrent = current
             if updatedCurrent >= bottom.current {
                 updatedCurrent = bottom.current
             }
@@ -105,7 +105,6 @@ struct CropHandlePositions {
             }
             top.current = updatedCurrent
         } else {
-            var updatedCurrent = current
             if updatedCurrent <= top.current {
                 updatedCurrent = top.current
             }
