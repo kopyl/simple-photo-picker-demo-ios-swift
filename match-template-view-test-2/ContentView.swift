@@ -209,7 +209,6 @@ struct ImageScrollView: View {
                                             let topPositionY = (geometry.size.height - imageSize.height) / 2
                                             let bottomPositionY = topPositionY + imageSize.height
                                             handlePositions[index] = CropHandlePositions(topPositionY, bottomPositionY)
-                                            print(2)
                                         }
                                     Rectangle()
                                         .fill(Color("overlay-crop-color"))
