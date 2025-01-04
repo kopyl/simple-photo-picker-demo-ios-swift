@@ -69,7 +69,6 @@ struct ButtonStyled: View {
             .background(importance == .secondary ? .blue.opacity(0.15) : .blue)
             .foregroundColor(importance == .secondary ? .blue : .white)
             .cornerRadius(8)
-            .opacity(1)
             .controlSize(.large)
         }
     }
