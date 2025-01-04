@@ -329,6 +329,7 @@ struct ImageScrollView: View {
                         }
                     }
                 }
+                .scrollClipDisabled(true)
                 .frame(width: geometry.size.width, height: geometry.size.height)
                 .scrollTargetLayout()
                 .scrollTargetBehavior(.viewAligned)
