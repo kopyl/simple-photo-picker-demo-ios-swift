@@ -314,16 +314,6 @@ struct ImageScrollView: View {
                 .frame(width: geometry.size.width, height: geometry.size.height)
                 .scrollTargetLayout()
                 .scrollTargetBehavior(.viewAligned)
-                .onAppear {
-                    for index in displayImages.indices {
-                        if handlePositions[index]?.top.current == nil &&
-                        handlePositions[index]?.bottom.current == nil {
-                            let imageSize = calculateImageSize(for: displayImages[index], in: geometry.size)
-                            handlePositions[index]?.top.current = (geometry.size.height - imageSize.height) / 2
-                            handlePositions[index]?.bottom.current = handlePositions[index]?.top.current ?? 0.0 + imageSize.height
-                        }
-                    }
-                }
                 .onPreferenceChange(ScrollOffsetKey.self) { _ in
                     withAnimation(.linear(duration: 0.25)){
                         cropHandleIsMoving = false
