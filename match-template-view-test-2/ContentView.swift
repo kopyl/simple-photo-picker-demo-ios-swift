@@ -221,7 +221,6 @@ struct ImageScrollView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 20) {
                         ForEach(displayImages.indices, id: \.self) { (index: Range<Array<UIImage>.Index>.Element) in
-                            GeometryReader { imageGeometry in
                                 ZStack {
                                     Image(uiImage: displayImages[index])
                                         .resizable()
@@ -242,7 +241,6 @@ struct ImageScrollView: View {
                                     
                                     getCropHandleView(side: .bottom, geometry: geometry, handlePositions: handlePositions, index: index)
                                 }
-                            }
                             .frame(width: geometry.size.width, height: geometry.size.height)
                         }
                     }
