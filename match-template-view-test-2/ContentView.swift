@@ -79,45 +79,35 @@ struct CropHandlePositions {
         var initial: CGFloat
         var current: CGFloat
 
-        var _min: CGFloat {
-            return min(initial, current)
-        }
-        
-        var _max: CGFloat {
-            return max(initial, current)
-        }
+        var _min: CGFloat { min(initial, current) }
+        var _max: CGFloat { max(initial, current) }
     }
 
     var top: Position
     var bottom: Position
 
-    init(_ _initialTop: CGFloat, _ _initialBottom: CGFloat) {
-        self.top = Position(initial: _initialTop, current: _initialTop)
-        self.bottom = Position(initial: _initialBottom, current: _initialBottom)
+    init(_ initialTop: CGFloat, _ initialBottom: CGFloat) {
+        self.top = Position(initial: initialTop, current: initialTop)
+        self.bottom = Position(initial: initialBottom, current: initialBottom)
     }
 
-    var p: [String: Position] {
-        get {
-            return [
-                "top": top,
-                "bottom": bottom
-            ]
-        }
-        set {
-            if let newTop = newValue["top"] {
-                var updatedTop = newTop
-                if updatedTop.current >= bottom.current {
-                    updatedTop.current = bottom.current
-                }
-                top = updatedTop
+    func position(for side: ImageScrollView.CropHandleSides) -> Position {
+        return side == .top ? top : bottom
+    }
+
+    mutating func updatePosition(for side: ImageScrollView.CropHandleSides, current: CGFloat) {
+        if side == .top {
+            var updatedCurrent = current
+            if updatedCurrent >= bottom.current {
+                updatedCurrent = bottom.current
             }
-            if let newBottom = newValue["bottom"] {
-                var updatedBottom = newBottom
-                if updatedBottom.current <= top.current {
-                    updatedBottom.current = top.current
-                }
-                bottom = updatedBottom
+            top.current = updatedCurrent
+        } else {
+            var updatedCurrent = current
+            if updatedCurrent <= top.current {
+                updatedCurrent = top.current
             }
+            bottom.current = updatedCurrent
         }
     }
 }
@@ -140,21 +130,21 @@ struct ImageScrollView: View {
     }
     
     private func calculatedOffsetForImageCroppingOverlay(for index: Int, side: CropHandleSides) -> CGSize {
-        let current = handlePositions[index]?.p[side.rawValue]?.current ?? 0
-        let initial = handlePositions[index]?.p[side.rawValue]?.initial ?? 0
-        let offset = -(initial-current)/2
+        guard let handlePosition = handlePositions[index] else { return .zero }
+        let position = handlePosition.position(for: side)
+        let offset = -(position.initial - position.current) / 2
         return CGSize(width: 0, height: offset)
     }
     
     private func calculatedHeightForImageCroppingOverlay(for index: Int, side: CropHandleSides) -> CGFloat {
-        let _min = handlePositions[index]?.p[side.rawValue]?._min ?? 0
-        let _max = handlePositions[index]?.p[side.rawValue]?._max ?? 0
-        return _max - _min
+        guard let handlePosition = handlePositions[index] else { return 0 }
+        let position = handlePosition.position(for: side)
+        return position._max - position._min
     }
     
     private func calculatedPositionForImageCroppingOverlay(for index: Int, side: CropHandleSides) -> CGFloat {
-        let initial = handlePositions[index]?.p[side.rawValue]?.initial ?? 0
-        return initial
+        guard let handlePosition = handlePositions[index] else { return 0 }
+        return handlePosition.position(for: side).initial
     }
     
     private func getCropHandleView(side: CropHandleSides, geometry: GeometryProxy, handlePositions: [Int: CropHandlePositions], index: Int) -> some View {
@@ -195,12 +185,12 @@ struct ImageScrollView: View {
         .frame(width: geometry.size.width, height: HandleSizes.safeArea.rawValue, alignment: .center)
         .position(
             x: geometry.size.width / 2,
-            y: handlePositions[index]?.p[side.rawValue]?.current ?? 0
+            y: handlePositions[index]?.position(for: side).current ?? 0
         )
         .gesture(
             DragGesture()
                 .onChanged { value in
-                    self.handlePositions[index]?.p[side.rawValue]?.current = value.location.y
+                    self.handlePositions[index]?.updatePosition(for: side, current: value.location.y)
                     withAnimation(.linear(duration: 0.05)) {
                         cropHandleIsMoving = true
                     }
