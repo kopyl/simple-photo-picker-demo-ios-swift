@@ -181,7 +181,7 @@ struct ImageScrollView: View {
         ZStack {
             ZStack {
                 Circle()
-                    .fill(side == .top ? .red : .blue)
+                    .fill(.blue)
                     .frame(width: HandleSizes.visible.rawValue, height: HandleSizes.visible.rawValue)
                 Circle()
                     .fill(.white)
