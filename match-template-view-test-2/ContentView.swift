@@ -214,8 +214,7 @@ struct ImageScrollView: View {
         )
         }
     }
-    
-    
+
     var body: some View {
         if cropperOpenTimesCount > 0 {
             GeometryReader { geometry in
@@ -224,8 +223,6 @@ struct ImageScrollView: View {
                         ForEach(displayImages.indices, id: \.self) { (index: Range<Array<UIImage>.Index>.Element) in
                             GeometryReader { imageGeometry in
                                 ZStack {
-                                    
-                                    
                                     Image(uiImage: displayImages[index])
                                         .resizable()
                                         .scaledToFit()
@@ -541,7 +538,6 @@ struct ContentView: View {
     @State private var handlePositions: [Int: CropHandlePositions] = [:]
     @State private var cropperOpenTimesCount: Int = 0
 
-    
     var body: some View {
         if cropperOpenTimesCount == 0 {
             VStack {
