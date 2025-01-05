@@ -306,7 +306,7 @@ struct PhotosPickerView: View {
             photoPickerOpenTimesCount += 1
         }
         .padding(.leading, 10).padding(.trailing, 10)
-        .photosPicker(isPresented: $isPickerPresented, selection: $selectedItems)
+        .photosPicker(isPresented: $isPickerPresented, selection: $selectedItems, matching: .not(.any(of: [.bursts, .cinematicVideos, .depthEffectPhotos, .livePhotos, .screenRecordings, .screenRecordings, .slomoVideos, .timelapseVideos, .videos])))
         .onChange(of: selectedItems) { oldval, newval in
            Task {
                if oldval.count == 0 && displayImages.count > 0 {
