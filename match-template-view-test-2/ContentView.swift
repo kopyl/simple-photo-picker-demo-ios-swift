@@ -548,7 +548,7 @@ struct ContentView: View {
             VStack {
                 VStack {
                     Image(uiImage: UIImage(named: "logo")!).resizable().frame(width: 22.42, height: 24.18)
-                    Text("sitchy")
+                    Text("crop-stitch")
                 }.padding(.top, 50)
                 Text("Crop and stitch screenshots vertically").font(.system(size: 21)).padding(.top, 52)
                 Spacer()
