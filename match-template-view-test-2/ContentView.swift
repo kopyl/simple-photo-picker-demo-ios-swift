@@ -167,7 +167,7 @@ struct ImageScrollView: View {
 
         return ZStack{
             Rectangle()
-                .fill(Color("overlay-crop-color"))
+                .fill(.overlayCrop)
                 .frame(
                     width: geometry.size.width,
                     height: calculatedHeightForImageCroppingOverlay(for: index, side: side)
