@@ -2,6 +2,32 @@ import SwiftUI
 import PhotosUI
 import AlertKit
 
+import SwiftUI
+
+struct RainbowGradientRectangle: View {
+    @State private var animateGradient = false
+    
+    let rainbowColors: [Color] = [.blue, .purple, .red, .orange, .yellow, .green]
+
+    var body: some View {
+        Rectangle()
+            .fill(
+                LinearGradient(
+                    gradient: Gradient(colors: animateGradient ? rainbowColors.reversed() : rainbowColors),
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+            .frame(width: .infinity, height: 2)
+            .onAppear {
+                withAnimation(.linear(duration: 0.5).repeatForever(autoreverses: true)) {
+                    animateGradient.toggle()
+                }
+            }
+    }
+}
+
+
 struct ScrollOffsetKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
@@ -180,19 +206,23 @@ struct ImageScrollView: View {
 
             ZStack {
                 ZStack {
-                    Circle()
-                        .fill(.blue)
-                        .frame(width: HandleSizes.visible.rawValue, height: HandleSizes.visible.rawValue)
-                    Circle()
-                        .fill(.white)
-                        .frame(width: HandleSizes.sign.rawValue, height: HandleSizes.sign.rawValue)
+                    RainbowGradientRectangle()
+                        .offset(y: side == .top ? -1 : 1 )
+                    ZStack {
+                        Circle()
+                            .fill(.blue)
+                            .frame(width: HandleSizes.visible.rawValue, height: HandleSizes.visible.rawValue)
+                        Circle()
+                            .fill(.white)
+                            .frame(width: HandleSizes.sign.rawValue, height: HandleSizes.sign.rawValue)
+                    }
+                    .scaleEffect(
+                        CGSize(
+                            width: cropHandleIsMoving ? 0 : 1,
+                            height: cropHandleIsMoving ? 0 : 1
+                        ), anchor: .center
+                    )
                 }
-                .scaleEffect(
-                    CGSize(
-                        width: cropHandleIsMoving ? 0 : 1,
-                        height: cropHandleIsMoving ? 0 : 1
-                    ), anchor: .center
-                )
                     
                 Rectangle()
                     .fill(.clear)
