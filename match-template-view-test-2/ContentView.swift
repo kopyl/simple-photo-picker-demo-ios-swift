@@ -244,14 +244,8 @@ struct ImageScrollView: View {
                                         }
                                     
                                     getCropHandleView(side: .top, geometry: geometry, handlePositions: handlePositions, index: index)
-//                                        .zIndex(
-//                                            handlePositions[index]?.lastSideInteractedWith == .top ? 1 : 0
-//                                        )
                                     
                                     getCropHandleView(side: .bottom, geometry: geometry, handlePositions: handlePositions, index: index)
-//                                        .zIndex(
-//                                            handlePositions[index]?.lastSideInteractedWith == .bottom ? 1 : 0
-//                                        )
                                 }
                             .frame(width: geometry.size.width, height: geometry.size.height)
                         }
